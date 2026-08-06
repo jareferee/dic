@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Colorado Referee Hub</title>
+<meta name="theme-color" content="#0E2438">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --slate:#0E2438; --slate-2:#17334B; --slate-3:#1F4260;
+  --ice:#7FB8DE; --ice-pale:#C5E0F2; --steel:#8E9BA9; --snow:#F2F6F9;
+  --caution:#E0A22B; --flag:#C4472F; --go:#4FA87A;
+  --disp:'Barlow Condensed',Impact,sans-serif;
+  --body:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--slate);color:var(--snow);font-family:var(--body);font-size:15px;line-height:1.5;padding-bottom:92px}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 95% 50% at 50% -6%,rgba(127,184,222,.15) 0%,transparent 62%),
+             radial-gradient(ellipse 70% 45% at 100% 100%,rgba(31,66,96,.42) 0%,transparent 55%)}
+.wrap{position:relative;z-index:1;max-width:660px;margin:0 auto;padding:0 15px}
+.screen{display:none}.screen.on{display:block}
+
+/* header */
+.top{position:sticky;top:0;z-index:30;background:rgba(14,36,56,.94);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(127,184,222,.2)}
+.top-in{max-width:660px;margin:0 auto;padding:11px 15px;display:flex;align-items:center;gap:11px}
+.shield{width:36px;height:42px;flex-shrink:0;
+  background:linear-gradient(160deg,var(--slate-3),var(--slate-2));
+  border:1.5px solid var(--steel);border-radius:5px 5px 18px 18px/5px 5px 26px 26px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--disp);font-weight:900;font-size:8.5px;color:var(--ice);letter-spacing:.05em}
+.top h1{margin:0;font-family:var(--disp);font-weight:900;font-size:19px;letter-spacing:.05em;text-transform:uppercase;line-height:1.02}
+.top .sub{font-family:var(--mono);font-size:9px;color:var(--steel);letter-spacing:.06em;margin-top:2px}
+.back{margin-left:auto;appearance:none;background:transparent;border:1.5px solid rgba(127,184,222,.3);
+  color:var(--ice);border-radius:8px;padding:7px 12px;cursor:pointer;
+  font-family:var(--disp);font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase}
+
+/* weather */
+.wx{border-bottom:1px solid rgba(127,184,222,.14);background:rgba(23,51,75,.5);cursor:pointer}
+.wx-in{max-width:660px;margin:0 auto;padding:8px 15px;display:flex;align-items:center;gap:9px;font-size:12.5px}
+.wx b{font-family:var(--disp);font-weight:800;font-size:12.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--go)}
+.wx span.d{color:var(--steel);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wx .more{font-family:var(--mono);font-size:9px;color:var(--ice)}
+.wx.alert{background:rgba(196,71,47,.2)} .wx.alert b{color:#F0A897}
+.wxb{display:none;background:rgba(9,25,40,.55);border-bottom:1px solid rgba(127,184,222,.14)}
+.wxb.on{display:block}
+.wxb-in{max-width:660px;margin:0 auto;padding:12px 15px 14px}
+.wxb h4{font-family:var(--disp);font-weight:800;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ice);margin:0 0 5px}
+.wxb h4+h4{margin-top:11px}
+.wxb p{margin:0;font-size:12.5px;line-height:1.6;color:var(--ice-pale)} .wxb b{color:#fff}
+
+/* doors */
+.hero{padding:26px 0 4px;text-align:center}
+.hero .k{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--ice);text-transform:uppercase}
+.hero h2{font-family:var(--disp);font-weight:900;font-size:38px;letter-spacing:.03em;
+  text-transform:uppercase;line-height:.98;margin:7px 0 5px}
+.hero p{margin:0;color:var(--steel);font-size:13.5px}
+.door{display:block;width:100%;appearance:none;cursor:pointer;text-align:left;
+  border-radius:13px;padding:17px 18px;margin-top:11px;transition:.16s;
+  border:1.5px solid rgba(127,184,222,.24);background:rgba(23,51,75,.55);color:var(--snow)}
+.door:hover{border-color:var(--ice);background:rgba(23,51,75,.8)}
+.door b{display:block;font-family:var(--disp);font-weight:900;font-size:23px;
+  letter-spacing:.07em;text-transform:uppercase;line-height:1}
+.door i{display:block;font-style:normal;font-size:13px;color:var(--steel);margin-top:4px}
+.door.primary{background:var(--ice);border-color:var(--ice);color:var(--slate)}
+.door.primary i{color:rgba(14,36,56,.72)}
+.door.primary:hover{filter:brightness(1.06)}
+
+
+/* SMST shield watermark, drawn in SVG so there is no file to break */
+body::after{
+  content:'';position:fixed;z-index:0;pointer-events:none;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  width:min(88vw,540px);height:min(88vw,540px);
+  background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20244%22%3E%20%3Cpath%20d%3D%22M14%2032%20L47%209%20L70%2036%20L100%207%20L130%2036%20L153%209%20L186%2032%20L186%20142%20C186%20197%20148%20229%20100%20238%20C52%20229%2014%20197%2014%20142%20Z%22%20fill%3D%22none%22%20stroke%3D%22%237FB8DE%22%20stroke-width%3D%225%22%2F%3E%20%3Cpath%20d%3D%22M27%2045%20L52%2028%20L71%2050%20L100%2026%20L129%2050%20L148%2028%20L173%2045%20L173%20140%20C173%20186%20142%20213%20100%20221%20C58%20213%2027%20186%2027%20140%20Z%22%20fill%3D%22none%22%20stroke%3D%22%237FB8DE%22%20stroke-width%3D%222%22%20opacity%3D%22.6%22%2F%3E%20%3Cpath%20d%3D%22M36%20141%20L74%2084%20L97%20114%20L125%2072%20L164%20141%20Z%22%20fill%3D%22%237FB8DE%22%20opacity%3D%22.85%22%2F%3E%20%3Ccircle%20cx%3D%22100%22%20cy%3D%22176%22%20r%3D%2227%22%20fill%3D%22none%22%20stroke%3D%22%237FB8DE%22%20stroke-width%3D%224%22%2F%3E%20%3Cpath%20d%3D%22M100%20158%20L112%20167%20L107%20181%20L93%20181%20L88%20167%20Z%22%20fill%3D%22%237FB8DE%22%20opacity%3D%22.7%22%2F%3E%20%3C%2Fsvg%3E");
+  background-repeat:no-repeat;background-position:center;background-size:contain;
+  opacity:.045;
+}
+@media (max-width:520px){ body::after{ opacity:.055 } }
+
+/* JAReferee credit */
+.jaref{margin-top:22px;padding:18px 0 4px;text-align:center;
+  border-top:1px solid rgba(127,184,222,.12)}
+.jaref a{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+.jaref img{width:26px;height:26px;display:block;border:0;opacity:.92}
+.jaref .txt{text-align:left;line-height:1.25}
+.jaref .txt b{display:block;font-family:var(--disp);font-weight:900;font-size:16px;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--ice-pale)}
+.jaref .txt i{display:block;font-style:normal;font-family:var(--mono);font-size:8.5px;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--steel);margin-top:2px}
+.jaref .site{display:block;font-family:var(--mono);font-size:9px;color:var(--steel);
+  letter-spacing:.09em;margin-top:9px}
+.jaref .site a{color:var(--ice)}
+
+/* public landing */
+.lead{display:block;width:100%;appearance:none;cursor:pointer;text-align:center;
+  border:0;border-radius:16px;padding:26px 20px 24px;margin-top:18px;
+  background:linear-gradient(150deg,var(--ice) 0%,#5FA3CE 100%);color:var(--slate);
+  text-decoration:none;transition:filter .16s,transform .16s}
+.lead:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.lead b{display:block;font-family:var(--disp);font-weight:900;font-size:40px;
+  letter-spacing:.05em;text-transform:uppercase;line-height:.94}
+.lead i{display:block;font-style:normal;font-size:14px;margin-top:7px;color:rgba(14,36,56,.76)}
+.lead .arrow{display:inline-block;margin-top:11px;font-family:var(--mono);font-size:11px;
+  letter-spacing:.16em;text-transform:uppercase;color:rgba(14,36,56,.6)}
+
+.blk{margin-top:30px}
+.blk-h{display:flex;align-items:baseline;gap:9px;margin-bottom:11px}
+.blk-h h3{margin:0;font-family:var(--disp);font-weight:800;font-size:13px;
+  letter-spacing:.19em;text-transform:uppercase;color:var(--ice)}
+.blk-h .rule{flex:1;height:1px;background:rgba(127,184,222,.18)}
+
+.ven{display:flex;align-items:center;gap:12px;border-radius:11px;padding:12px 14px;
+  margin-bottom:7px;background:rgba(23,51,75,.42);border:1px solid rgba(127,184,222,.12);
+  text-decoration:none;color:var(--snow);transition:.14s}
+.ven:hover{border-color:var(--ice);background:rgba(23,51,75,.72)}
+.ven-n{flex:1;min-width:0}
+.ven-n b{display:block;font-family:var(--disp);font-weight:800;font-size:18px;
+  letter-spacing:.03em;line-height:1.1}
+.ven-n i{display:block;font-style:normal;font-family:var(--mono);font-size:9.5px;
+  color:var(--steel);margin-top:3px}
+.ven-g{font-family:var(--disp);font-weight:900;font-size:20px;color:var(--ice-pale);
+  text-align:right;line-height:1}
+.ven-g span{display:block;font-family:var(--mono);font-size:8.5px;font-weight:500;
+  color:var(--steel);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.ven-dir{font-family:var(--mono);font-size:9px;color:var(--ice);letter-spacing:.09em;
+  text-transform:uppercase;white-space:nowrap}
+
+.promo{border-radius:12px;padding:15px 17px;background:rgba(224,162,43,.09);
+  border:1px solid rgba(224,162,43,.34)}
+.promo b{display:block;font-family:var(--disp);font-weight:800;font-size:17px;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--caution);margin-bottom:5px}
+.promo p{margin:0;font-size:13px;line-height:1.6;color:var(--ice-pale)}
+.promo a{color:var(--caution);text-decoration:none;font-weight:600}
+.promo .fine{font-family:var(--mono);font-size:9.5px;color:var(--steel);margin-top:8px;line-height:1.6}
+
+.title-sponsor{border-radius:13px;padding:19px 18px;text-align:center;
+  background:rgba(242,246,249,.95);border:1px solid rgba(127,184,222,.3)}
+.title-sponsor .k{font-family:var(--mono);font-size:9px;letter-spacing:.22em;
+  text-transform:uppercase;color:#5A6A79;margin-bottom:9px}
+.title-sponsor b{display:block;font-family:var(--disp);font-weight:900;font-size:31px;
+  letter-spacing:.04em;color:#1B7A3E;line-height:.96}
+.title-sponsor b span{color:#1B4D7A}
+.title-sponsor i{display:block;font-style:normal;font-size:12.5px;color:#42525F;margin-top:5px}
+.title-sponsor a{display:inline-block;margin-top:9px;font-family:var(--mono);font-size:10.5px;
+  color:#1B4D7A;text-decoration:none;letter-spacing:.05em}
+
+.spon2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+@media(max-width:430px){.spon2{grid-template-columns:1fr}}
+.spon{border-radius:11px;padding:13px 14px;background:rgba(23,51,75,.42);
+  border:1px solid rgba(127,184,222,.12);text-decoration:none;color:var(--snow);
+  display:block;transition:.14s}
+.spon:hover{border-color:var(--ice)}
+.spon b{display:block;font-family:var(--disp);font-weight:800;font-size:16px;
+  letter-spacing:.05em;text-transform:uppercase;line-height:1.05}
+.spon i{display:block;font-style:normal;font-size:11.5px;color:var(--steel);
+  margin-top:4px;line-height:1.45}
+
+.quiet{margin-top:34px;padding-top:20px;border-top:1px solid rgba(127,184,222,.14)}
+.qrow{display:flex;align-items:center;gap:11px;width:100%;appearance:none;cursor:pointer;
+  text-align:left;background:transparent;border:1.5px solid rgba(127,184,222,.2);
+  border-radius:10px;padding:12px 14px;margin-bottom:8px;color:var(--snow);transition:.14s;
+  text-decoration:none}
+.qrow:hover{border-color:var(--ice);background:rgba(23,51,75,.5)}
+.qrow b{flex:1;font-family:var(--disp);font-weight:800;font-size:16px;
+  letter-spacing:.07em;text-transform:uppercase}
+.qrow i{font-style:normal;font-family:var(--mono);font-size:9px;color:var(--steel);
+  letter-spacing:.08em;text-transform:uppercase}
+.qrow .chev{color:var(--ice);font-size:15px}
+
+.ssc{margin-top:26px;padding:17px 0 8px;text-align:center;
+  border-top:1px solid rgba(127,184,222,.14)}
+.ssc .nm{font-family:var(--disp);font-weight:800;font-size:15px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ice-pale)}
+.ssc .meta{font-family:var(--mono);font-size:9.5px;color:var(--steel);line-height:1.85;margin-top:6px}
+.ssc a{color:var(--ice);text-decoration:none}
+
+/* pin */
+.pinbox{margin-top:22px;border-top:1px solid rgba(127,184,222,.16);padding-top:18px}
+.pinbox label{display:block;font-family:var(--disp);font-weight:800;font-size:11.5px;
+  letter-spacing:.19em;text-transform:uppercase;color:var(--steel);margin-bottom:8px}
+.pinrow{display:flex;gap:9px}
+.pinrow input{flex:1;background:rgba(9,25,40,.72);border:1.5px solid rgba(127,184,222,.24);
+  border-radius:9px;color:var(--snow);font-family:var(--mono);font-size:19px;
+  letter-spacing:.35em;padding:12px 14px;outline:none;text-align:center}
+.pinrow input:focus{border-color:var(--ice)}
+.pinrow button{appearance:none;border:0;cursor:pointer;border-radius:9px;background:var(--ice);
+  color:var(--slate);font-family:var(--disp);font-weight:900;font-size:16px;
+  letter-spacing:.09em;text-transform:uppercase;padding:0 20px}
+.err{color:#F0A897;font-size:12.5px;margin-top:8px;min-height:17px}
+
+/* search */
+.search{position:relative;margin-top:16px}
+.search input{width:100%;background:rgba(9,25,40,.72);border:1.5px solid rgba(127,184,222,.24);
+  border-radius:11px;color:var(--snow);font-family:var(--body);font-size:16px;
+  padding:14px 15px;outline:none}
+.search input:focus{border-color:var(--ice)}
+.reflist{margin-top:11px}
+.refrow{display:flex;align-items:center;gap:11px;width:100%;appearance:none;cursor:pointer;
+  text-align:left;background:rgba(23,51,75,.45);border:1px solid rgba(127,184,222,.13);
+  border-radius:10px;padding:13px 14px;margin-bottom:7px;color:var(--snow);transition:.14s}
+.refrow:hover{border-color:var(--ice);background:rgba(23,51,75,.75)}
+.refrow b{flex:1;font-size:15.5px;font-weight:600}
+.refrow i{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--steel)}
+
+/* next-up hero card, the signature */
+.next{border-radius:14px;padding:19px 19px 17px;margin:18px 0 0;
+  background:linear-gradient(155deg,rgba(127,184,222,.19),rgba(23,51,75,.62));
+  border:1.5px solid rgba(127,184,222,.42)}
+.next .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ice);margin-bottom:9px}
+.next-top{display:flex;align-items:center;gap:14px;margin-bottom:13px}
+.pos{width:58px;height:58px;flex-shrink:0;border-radius:12px;background:var(--ice);color:var(--slate);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--disp);font-weight:900;font-size:22px;letter-spacing:.03em}
+.next-when{flex:1;min-width:0}
+.next-when b{display:block;font-family:var(--disp);font-weight:900;font-size:30px;letter-spacing:.02em;line-height:1}
+.next-when i{display:block;font-style:normal;font-size:13px;color:var(--ice-pale);margin-top:3px}
+.next-match{font-size:14.5px;line-height:1.45;margin-bottom:3px}
+.next-meta{font-family:var(--mono);font-size:10px;color:var(--steel)}
+.next-acts{display:flex;gap:8px;margin-top:14px}
+
+/* buttons */
+.btn{appearance:none;border:0;cursor:pointer;border-radius:10px;
+  font-family:var(--disp);font-weight:900;font-size:15px;letter-spacing:.09em;
+  text-transform:uppercase;padding:12px 16px;flex:1;transition:filter .14s}
+.btn:hover{filter:brightness(1.08)}
+.btn.go{background:var(--go);color:#05261A}
+.btn.ice{background:var(--ice);color:var(--slate)}
+.btn.ghost{background:transparent;color:var(--ice);border:1.5px solid rgba(127,184,222,.4)}
+.btn.done{background:rgba(79,168,122,.16);color:var(--go);border:1.5px solid rgba(79,168,122,.5);cursor:default}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* game rows */
+.sec{margin-top:24px}
+.sec-h{display:flex;align-items:baseline;gap:9px;margin-bottom:9px}
+.sec-h h3{margin:0;font-family:var(--disp);font-weight:800;font-size:13px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--ice)}
+.sec-h .rule{flex:1;height:1px;background:rgba(127,184,222,.18)}
+.sec-h .n{font-family:var(--mono);font-size:10px;color:var(--steel)}
+
+.gm{border-radius:11px;padding:13px 14px;margin-bottom:8px;
+  background:rgba(23,51,75,.42);border:1px solid rgba(127,184,222,.12)}
+.gm.past{opacity:.62}
+.gm-top{display:flex;align-items:center;gap:11px;margin-bottom:8px}
+.pos-sm{width:38px;height:32px;flex-shrink:0;border-radius:8px;
+  background:rgba(127,184,222,.16);border:1px solid rgba(127,184,222,.35);color:var(--ice);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--disp);font-weight:900;font-size:13px}
+.gm-when{flex:1;min-width:0}
+.gm-when b{font-family:var(--disp);font-weight:800;font-size:18px;letter-spacing:.03em}
+.gm-when i{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--steel);margin-left:7px}
+.gm-badge{font-family:var(--disp);font-weight:800;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.gm-badge.in{background:rgba(79,168,122,.16);color:var(--go);border:1px solid rgba(79,168,122,.42)}
+.gm-badge.out{background:rgba(224,162,43,.13);color:var(--caution);border:1px solid rgba(224,162,43,.4)}
+.gm-badge.fin{background:rgba(127,184,222,.14);color:var(--ice);border:1px solid rgba(127,184,222,.36)}
+.gm-match{font-size:14px;line-height:1.42}
+.gm-meta{font-family:var(--mono);font-size:9.5px;color:var(--steel);margin-top:4px}
+.gm-acts{display:flex;gap:7px;margin-top:11px}
+.gm-acts .btn{font-size:13px;padding:9px 12px}
+.gm-score{font-family:var(--disp);font-weight:900;font-size:19px;color:var(--ice-pale);margin-left:auto}
+
+/* staff */
+.rolebar{display:flex;align-items:center;gap:10px;padding:14px 0 2px}
+.rolebar .who{flex:1;min-width:0}
+.rolebar .who b{display:block;font-family:var(--disp);font-weight:900;font-size:22px;letter-spacing:.04em;line-height:1}
+.rolebar .who i{display:block;font-style:normal;font-family:var(--mono);font-size:10px;color:var(--ice);margin-top:3px;letter-spacing:.09em;text-transform:uppercase}
+.days{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:14px}
+.days button{appearance:none;cursor:pointer;border-radius:9px;padding:9px 4px;
+  background:rgba(23,51,75,.6);border:1.5px solid rgba(127,184,222,.22);color:var(--steel);transition:.16s}
+.days button b{display:block;font-family:var(--disp);font-weight:800;font-size:15px;letter-spacing:.07em;text-transform:uppercase;line-height:1}
+.days button i{display:block;font-style:normal;font-family:var(--mono);font-size:9px;margin-top:3px}
+.days button[aria-pressed="true"]{background:var(--ice);color:var(--slate);border-color:var(--ice)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:13px}
+.stat{background:rgba(23,51,75,.45);border:1px solid rgba(127,184,222,.13);
+  border-radius:9px;padding:10px 8px;text-align:center}
+.stat b{display:block;font-family:var(--disp);font-weight:900;font-size:23px;line-height:1;color:var(--ice-pale)}
+.stat i{display:block;font-style:normal;font-family:var(--mono);font-size:8.5px;color:var(--steel);
+  margin-top:4px;letter-spacing:.06em;text-transform:uppercase}
+.stat.warn b{color:var(--caution)}
+.crew{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.cw{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:99px;
+  border:1px solid rgba(127,184,222,.24);color:var(--steel)}
+.cw.in{border-color:rgba(79,168,122,.5);color:var(--go);background:rgba(79,168,122,.09)}
+
+/* completed games collapse to the bottom */
+.gm.spent{opacity:.5}
+.gm.spent .gm-match{font-size:13px}
+.gm.spent .crew,.gm.spent .gm-acts{display:none}
+.spent-h{display:flex;align-items:baseline;gap:9px;margin:22px 0 9px;cursor:pointer}
+.spent-h h3{margin:0;font-family:var(--disp);font-weight:800;font-size:12px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--steel)}
+.spent-h .rule{flex:1;height:1px;background:rgba(127,184,222,.12)}
+.spent-h .cv{font-family:var(--mono);font-size:10px;color:var(--steel)}
+.spent-body{display:none}
+.spent-body.on{display:block}
+
+/* emergency ack */
+.alertbar .acts{display:flex;gap:7px;margin-top:11px}
+.alertbar .acts button{flex:1;appearance:none;cursor:pointer;border-radius:8px;padding:9px 8px;
+  font-family:var(--disp);font-weight:900;font-size:13px;letter-spacing:.07em;text-transform:uppercase;
+  border:1.5px solid rgba(240,168,151,.45);background:rgba(196,71,47,.18);color:#F0A897}
+.alertbar .acts button:hover{background:rgba(196,71,47,.32)}
+.alertbar .acts button.on{background:var(--go);border-color:var(--go);color:#05261A}
+.alertbar.roster{background:rgba(224,162,43,.15);border-color:rgba(224,162,43,.5)}
+.alertbar.roster b{color:var(--caution)}
+.alertbar.roster .acts button{border-color:rgba(224,162,43,.45);
+  background:rgba(224,162,43,.16);color:var(--caution)}
+.alertbar.roster .acts button:hover{background:rgba(224,162,43,.3)}
+.alertbar .enr{font-family:var(--mono);font-size:10px;color:var(--go);margin-top:8px;
+  letter-spacing:.06em;text-transform:uppercase}
+
+/* referee tournament info */
+.info{border-radius:12px;padding:15px 17px;margin-top:9px;background:rgba(23,51,75,.42);
+  border:1px solid rgba(127,184,222,.13)}
+.info b{display:block;font-family:var(--disp);font-weight:800;font-size:14px;
+  letter-spacing:.07em;text-transform:uppercase;color:var(--ice);margin-bottom:5px}
+.info p{margin:0;font-size:13px;line-height:1.6;color:var(--ice-pale)}
+.info p+p{margin-top:7px}
+.info a{color:var(--ice)}
+
+/* staff message card */
+.msgcard{border-radius:13px;padding:17px 18px;margin-top:14px;
+  background:linear-gradient(150deg,rgba(127,184,222,.14),rgba(23,51,75,.6));
+  border:1px solid rgba(127,184,222,.3)}
+.msgcard .k{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--ice);margin-bottom:9px}
+.msgcard p{margin:0;font-size:14.5px;line-height:1.62;color:var(--snow);white-space:pre-line}
+
+/* staff view tabs */
+.vtabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:14px}
+.vtabs button{font-size:12px;padding:9px 2px}
+.vtabs button{appearance:none;cursor:pointer;border-radius:9px;padding:9px 4px;
+  background:rgba(23,51,75,.55);border:1.5px solid rgba(127,184,222,.2);color:var(--steel);
+  font-family:var(--disp);font-weight:800;font-size:13px;letter-spacing:.09em;
+  text-transform:uppercase;transition:.15s}
+.vtabs button[aria-pressed="true"]{background:var(--ice);color:var(--slate);border-color:var(--ice)}
+.vtabs button .badge{display:inline-block;margin-left:5px;font-family:var(--mono);
+  font-size:9px;background:var(--flag);color:#fff;border-radius:99px;padding:1px 5px;vertical-align:1px}
+
+/* incident + sit-out rows */
+.inc{border-radius:11px;padding:13px 14px;margin-bottom:8px;background:rgba(23,51,75,.42);
+  border:1px solid rgba(127,184,222,.12)}
+.inc.urgent{border-color:rgba(196,71,47,.5);background:rgba(196,71,47,.09)}
+.inc.closed{opacity:.55}
+.inc-top{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.inc-code{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ice);
+  border:1px solid rgba(127,184,222,.35);border-radius:6px;padding:3px 8px}
+.inc.urgent .inc-code{color:#F0A897;border-color:rgba(196,71,47,.5)}
+.inc-who{flex:1;min-width:0;font-family:var(--disp);font-weight:800;font-size:18px;
+  letter-spacing:.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inc-meta{font-family:var(--mono);font-size:9.5px;color:var(--steel);margin-bottom:7px}
+.inc-narr{font-size:13.5px;line-height:1.55;color:var(--ice-pale);
+  max-height:64px;overflow:hidden;position:relative;cursor:pointer}
+.inc-narr.open{max-height:none}
+.inc-narr:not(.open)::after{content:'';position:absolute;left:0;right:0;bottom:0;height:26px;
+  background:linear-gradient(transparent,rgba(23,51,75,.95))}
+.inc-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.tag{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 8px;border-radius:99px;border:1px solid rgba(127,184,222,.25);color:var(--steel)}
+.tag.red{border-color:rgba(196,71,47,.5);color:#F0A897}
+.tag.amber{border-color:rgba(224,162,43,.45);color:var(--caution)}
+.tag.green{border-color:rgba(79,168,122,.5);color:var(--go)}
+
+
+/* sideline conduct block */
+.conduct{border-radius:12px;padding:16px 18px;background:rgba(23,51,75,.45);
+  border:1px solid rgba(127,184,222,.22);display:block;text-decoration:none;color:var(--snow);
+  transition:.15s}
+.conduct:hover{border-color:var(--ice);background:rgba(23,51,75,.72)}
+.conduct b{display:block;font-family:var(--disp);font-weight:800;font-size:18px;
+  letter-spacing:.05em;text-transform:uppercase;line-height:1.05;margin-bottom:6px}
+.conduct p{margin:0;font-size:13px;line-height:1.6;color:var(--ice-pale)}
+.conduct .go{display:inline-block;margin-top:9px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.11em;text-transform:uppercase;color:var(--ice)}
+
+/* RAP handout */
+.qrwrap{text-align:center;padding:4px 0 0}
+.qrwrap svg{width:min(62vw,236px);height:auto;border-radius:10px;display:block;margin:0 auto}
+.qrurl{font-family:var(--mono);font-size:14px;color:var(--ice);margin-top:13px;
+  letter-spacing:.02em;word-break:break-all}
+.qrsay{margin-top:14px;padding:13px 15px;border-radius:10px;text-align:left;
+  background:rgba(127,184,222,.1);border-left:2px solid var(--ice)}
+.qrsay b{display:block;font-family:var(--disp);font-weight:800;font-size:11.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ice);margin-bottom:5px}
+.qrsay p{margin:0;font-size:13.5px;line-height:1.6;color:var(--ice-pale)}
+.handout{width:100%;appearance:none;cursor:pointer;border-radius:10px;margin-bottom:12px;
+  background:rgba(224,162,43,.11);border:1.5px solid rgba(224,162,43,.4);color:var(--caution);
+  font-family:var(--disp);font-weight:900;font-size:15px;letter-spacing:.08em;
+  text-transform:uppercase;padding:12px}
+.handout:hover{background:rgba(224,162,43,.2)}
+@media print{
+  body::before,body::after,.top,.wx,.wxb,.sos,.bar{display:none!important}
+  body{background:#fff;color:#000}
+  .mbg{position:static;display:block!important;background:#fff;padding:0}
+  .modal{border:0;max-width:none}
+  .m-f{display:none}
+}
+
+/* alerts */
+.alertbar{background:rgba(196,71,47,.22);border:1.5px solid rgba(196,71,47,.55);
+  border-radius:11px;padding:13px 15px;margin-top:14px}
+.alertbar b{display:block;font-family:var(--disp);font-weight:900;font-size:15px;
+  letter-spacing:.09em;text-transform:uppercase;color:#F0A897;margin-bottom:3px}
+.alertbar p{margin:0;font-size:13px;color:var(--ice-pale)}
+
+/* emergency FAB */
+.sos{position:fixed;right:15px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:40;
+  appearance:none;border:0;cursor:pointer;border-radius:99px;
+  background:var(--flag);color:#fff;box-shadow:0 6px 22px rgba(196,71,47,.45);
+  font-family:var(--disp);font-weight:900;font-size:15px;letter-spacing:.1em;
+  text-transform:uppercase;padding:14px 20px}
+.sos:hover{filter:brightness(1.08)}
+
+/* modal */
+.mbg{display:none;position:fixed;inset:0;z-index:60;background:rgba(4,12,20,.86);
+  align-items:center;justify-content:center;padding:16px}
+.mbg.on{display:flex}
+.modal{background:var(--slate-2);border:1.5px solid rgba(127,184,222,.3);
+  border-radius:15px;max-width:440px;width:100%;max-height:88vh;overflow:auto}
+.m-h{padding:16px 18px 13px;border-bottom:1px solid rgba(127,184,222,.18)}
+.m-h b{display:block;font-family:var(--disp);font-weight:900;font-size:21px;letter-spacing:.04em;line-height:1.06}
+.m-h i{display:block;font-style:normal;font-family:var(--mono);font-size:10px;color:var(--steel);margin-top:4px}
+.m-b{padding:17px 18px}
+.m-f{padding:13px 18px;border-top:1px solid rgba(127,184,222,.18);display:flex;gap:9px}
+.scorepad{display:grid;grid-template-columns:1fr auto 1fr;gap:11px;align-items:end}
+.scorepad .sp b{display:block;font-size:12px;color:var(--steel);text-align:center;
+  margin-bottom:7px;min-height:32px;display:flex;align-items:flex-end;justify-content:center;line-height:1.3}
+.scorepad input{width:100%;background:rgba(9,25,40,.75);border:1.5px solid rgba(127,184,222,.26);
+  border-radius:11px;color:var(--snow);text-align:center;padding:14px;
+  font-family:var(--disp);font-weight:900;font-size:40px;outline:none}
+.scorepad input:focus{border-color:var(--ice)}
+.scorepad .vs{font-family:var(--disp);font-weight:900;color:var(--steel);font-size:15px;padding-bottom:18px}
+.reasons{display:grid;gap:8px}
+.reasons button{appearance:none;cursor:pointer;text-align:left;border-radius:10px;padding:13px 15px;
+  background:rgba(9,25,40,.55);border:1.5px solid rgba(127,184,222,.22);color:var(--snow);transition:.14s}
+.reasons button:hover{border-color:var(--flag);background:rgba(196,71,47,.13)}
+.reasons button b{display:block;font-family:var(--disp);font-weight:800;font-size:17px;letter-spacing:.05em;text-transform:uppercase;line-height:1}
+.reasons button i{display:block;font-style:normal;font-size:12px;color:var(--steel);margin-top:3px}
+.nudge{background:rgba(224,162,43,.11);border-left:2px solid var(--caution);
+  border-radius:0 9px 9px 0;padding:12px 14px;margin-top:14px}
+.nudge b{display:block;font-family:var(--disp);font-weight:800;font-size:12.5px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--caution);margin-bottom:4px}
+.nudge p{margin:0;font-size:12.5px;color:var(--ice-pale);line-height:1.55}
+
+.empty{text-align:center;padding:40px 18px;color:var(--steel);font-size:14px}
+.empty b{display:block;font-family:var(--disp);font-weight:800;font-size:19px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ice-pale);margin-bottom:6px}
+.foot{margin:32px 0 0;padding:16px 0 22px;border-top:1px solid rgba(127,184,222,.14);
+  text-align:center;font-family:var(--mono);font-size:9px;color:var(--steel);line-height:1.8}
+.foot a{color:var(--ice);text-decoration:none}
+.demo{background:var(--caution);color:#2A1D02;font-family:var(--disp);font-weight:800;
+  font-size:12px;letter-spacing:.15em;text-transform:uppercase;text-align:center;padding:6px;display:none}
+.demo.on{display:block}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="demo" id="demoBar">Sample data · backend not reachable</div>
+
+<div class="top">
+  <div class="top-in">
+    <div class="shield" id="brShield">&nbsp;</div>
+    <div>
+      <h1 id="brName">Referee Hub</h1>
+      <div class="sub" id="brSub">COLORADO REFEREE HUB</div>
+    </div>
+    <button class="back" id="backBtn" onclick="goHome()" style="display:none">Back</button>
+  </div>
+</div>
+
+<div class="wx" id="wxStrip" onclick="toggleWx()">
+  <div class="wx-in">
+    <span id="wxIco">☀️</span>
+    <b id="wxState">Fields open</b>
+    <span class="d" id="wxDesc">&nbsp;</span>
+    <span class="more" id="wxMore">policy ▾</span>
+  </div>
+</div>
+<div class="wxb" id="wxBody"><div class="wxb-in">
+  <h4>Lightning</h4>
+  <p>Lightning within a <b>10 mile radius</b> stops all games at that location with <b>one long blast of a horn</b>. Leave the fields immediately and wait in a vehicle or off site.</p>
+  <p style="margin-top:5px">A full <b>30 minutes</b> must pass with no strikes before the all clear. <b>Every new strike resets the clock.</b> Do not return until you hear the horn.</p>
+  <h4>Delays</h4>
+  <p>A game past halftime is called <b>final</b> after 60 minutes of delay.</p>
+</div></div>
+
+<div class="wrap">
+
+<!-- ══ LANDING ══ -->
+<div class="screen on" id="s-home">
+  <div class="hero">
+    <div class="k" id="hKicker"></div>
+    <h2 id="hName"></h2>
+    <p id="hSub"></p>
+  </div>
+
+  <a class="lead" href="scoreboard.html">
+    <b>Live Scores</b>
+    <i>Every game, every division, updated as they finish</i>
+    <span class="arrow">Tap to open &#9656;</span>
+  </a>
+
+  <div class="blk">
+    <div class="blk-h"><h3>Where to go</h3><div class="rule"></div></div>
+    <div id="hVenues"></div>
+  </div>
+
+  <div class="blk" id="hLogosBlk" style="display:none">
+    <div class="blk-h"><h3>Hosted by</h3><div class="rule"></div></div>
+    <div id="hLogos"></div>
+  </div>
+
+<!-- ══ REF PICK ══ -->
+<div class="screen" id="s-pick">
+  <div class="hero" style="padding:22px 0 0">
+    <h2 style="font-size:31px">Who are you?</h2>
+    <p>Start typing your name</p>
+  </div>
+  <div class="search"><input type="text" id="refSearch" placeholder="Last name or first name"
+       autocomplete="off" autocapitalize="words" oninput="filterRefs()"></div>
+  <div class="reflist" id="refList"></div>
+</div>
+
+<!-- ══ REF DAY ══ -->
+<div class="screen" id="s-ref">
+  <div class="hero" style="padding:20px 0 0;text-align:left">
+    <div class="k" id="refGreet">Good morning</div>
+    <h2 style="font-size:32px" id="refName">—</h2>
+  </div>
+  <div id="refBody"></div>
+  <div class="foot">Scores you post appear on the public board straight away.</div>
+  <div class="jaref">
+    <a href="https://jareferee.com" target="_blank" rel="noopener">
+      <img src="assets/brand/jareferee-mark-light.png"
+           alt="JAReferee" width="26" height="26">
+      <span class="txt"><b>JAReferee</b><i>Referee Operations</i></span>
+    </a>
+    <span class="site">Gameday Command Center · <a href="https://jareferee.com" target="_blank" rel="noopener">jareferee.com</a></span>
+  </div>
+
+</div>
+
+<!-- ══ STAFF ══ -->
+<div class="screen" id="s-staff">
+  <div class="rolebar">
+    <div class="who"><b id="staffName">—</b><i id="staffRole">—</i></div>
+  </div>
+  <div id="staffMsg"></div>
+  <div id="staffAlerts"></div>
+  <div class="days" id="staffDays"></div>
+  <a class="handout" href="cards.html" style="display:block;text-align:center;text-decoration:none;margin-top:14px">Print game cards</a>
+  <div class="vtabs" id="vtabs">
+    <button aria-pressed="true"  onclick="setView('games',this)">Games</button>
+    <button aria-pressed="false" onclick="setView('incidents',this)">Incidents<span class="badge" id="incBadge" style="display:none">0</span></button>
+    <button aria-pressed="false" onclick="setView('sitout',this)">Sit out<span class="badge" id="sitBadge" style="display:none">0</span></button>
+    <button aria-pressed="false" onclick="setView('roster',this)">Roster<span class="badge" id="rosBadge" style="display:none">0</span></button>
+  </div>
+  <div class="stats" id="staffStats"></div>
+  <div id="staffBody"></div>
+</div>
+
+</div>
+
+<button class="sos" onclick="openSos()">🚨 Help</button>
+
+<!-- score modal -->
+<div class="mbg" id="scoreBg" onclick="if(event.target===this)closeModal('scoreBg')">
+  <div class="modal">
+    <div class="m-h"><b id="scTitle">Final score</b><i id="scSub">—</i></div>
+    <div class="m-b">
+      <div class="scorepad" id="scPad">
+        <div class="sp"><b id="scHomeName">Home</b><input type="number" id="scHome" min="0" max="99" inputmode="numeric"></div>
+        <div class="vs">VS</div>
+        <div class="sp"><b id="scAwayName">Away</b><input type="number" id="scAway" min="0" max="99" inputmode="numeric"></div>
+      </div>
+      <div class="nudge" id="scNudge" style="display:none">
+        <b>One more thing</b>
+        <p>Complete your game report in Assignr. That is how you get paid, and the tournament cannot close your game without it.</p>
+      </div>
+    </div>
+    <div class="m-f" id="scFoot">
+      <button class="btn ghost" onclick="closeModal('scoreBg')">Cancel</button>
+      <button class="btn ice" id="scSave" onclick="saveScore()">Post score</button>
+    </div>
+  </div>
+</div>
+
+<!-- RAP handout -->
+<div class="mbg" id="rapBg" onclick="if(event.target===this)closeModal('rapBg')">
+  <div class="modal">
+    <div class="m-h"><b>Hand this to them</b><i>Sideline conduct · gets them back tomorrow</i></div>
+    <div class="m-b">
+      <div class="qrwrap"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 37" shape-rendering="crispEdges" role="img" aria-label="QR code to the sideline conduct page"><rect width="37" height="37" fill="#F2F6F9"/><path fill="#0E2438" d="M2 2h7v1h-7zM10 2h1v1h-1zM12 2h2v1h-2zM17 2h1v1h-1zM19 2h7v1h-7zM28 2h7v1h-7zM2 3h1v1h-1zM8 3h1v1h-1zM11 3h1v1h-1zM13 3h3v1h-3zM20 3h1v1h-1zM22 3h1v1h-1zM25 3h1v1h-1zM28 3h1v1h-1zM34 3h1v1h-1zM2 4h1v1h-1zM4 4h3v1h-3zM8 4h1v1h-1zM10 4h1v1h-1zM12 4h1v1h-1zM14 4h1v1h-1zM16 4h3v1h-3zM20 4h1v1h-1zM22 4h3v1h-3zM28 4h1v1h-1zM30 4h3v1h-3zM34 4h1v1h-1zM2 5h1v1h-1zM4 5h3v1h-3zM8 5h1v1h-1zM10 5h4v1h-4zM16 5h1v1h-1zM18 5h3v1h-3zM22 5h4v1h-4zM28 5h1v1h-1zM30 5h3v1h-3zM34 5h1v1h-1zM2 6h1v1h-1zM4 6h3v1h-3zM8 6h1v1h-1zM11 6h6v1h-6zM19 6h4v1h-4zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h3v1h-3zM34 6h1v1h-1zM2 7h1v1h-1zM8 7h1v1h-1zM10 7h1v1h-1zM13 7h1v1h-1zM16 7h1v1h-1zM18 7h4v1h-4zM23 7h2v1h-2zM28 7h1v1h-1zM34 7h1v1h-1zM2 8h7v1h-7zM10 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM16 8h1v1h-1zM18 8h1v1h-1zM20 8h1v1h-1zM22 8h1v1h-1zM24 8h1v1h-1zM26 8h1v1h-1zM28 8h7v1h-7zM10 9h5v1h-5zM16 9h1v1h-1zM18 9h3v1h-3zM23 9h1v1h-1zM25 9h1v1h-1zM3 10h1v1h-1zM5 10h1v1h-1zM7 10h5v1h-5zM13 10h1v1h-1zM18 10h1v1h-1zM23 10h1v1h-1zM25 10h5v1h-5zM31 10h2v1h-2zM34 10h1v1h-1zM2 11h1v1h-1zM4 11h3v1h-3zM10 11h1v1h-1zM15 11h2v1h-2zM18 11h3v1h-3zM22 11h3v1h-3zM26 11h4v1h-4zM33 11h2v1h-2zM6 12h1v1h-1zM8 12h2v1h-2zM13 12h1v1h-1zM17 12h2v1h-2zM20 12h2v1h-2zM28 12h3v1h-3zM32 12h1v1h-1zM34 12h1v1h-1zM2 13h3v1h-3zM6 13h1v1h-1zM9 13h2v1h-2zM12 13h1v1h-1zM14 13h1v1h-1zM16 13h2v1h-2zM20 13h1v1h-1zM23 13h2v1h-2zM26 13h3v1h-3zM30 13h2v1h-2zM34 13h1v1h-1zM5 14h1v1h-1zM8 14h2v1h-2zM11 14h1v1h-1zM13 14h3v1h-3zM17 14h2v1h-2zM20 14h3v1h-3zM24 14h1v1h-1zM26 14h1v1h-1zM28 14h2v1h-2zM31 14h1v1h-1zM33 14h2v1h-2zM2 15h2v1h-2zM5 15h3v1h-3zM11 15h1v1h-1zM15 15h1v1h-1zM17 15h2v1h-2zM20 15h1v1h-1zM22 15h2v1h-2zM25 15h1v1h-1zM28 15h1v1h-1zM30 15h2v1h-2zM33 15h2v1h-2zM2 16h2v1h-2zM7 16h4v1h-4zM15 16h2v1h-2zM20 16h2v1h-2zM23 16h8v1h-8zM32 16h2v1h-2zM2 17h1v1h-1zM7 17h1v1h-1zM9 17h2v1h-2zM16 17h2v1h-2zM19 17h1v1h-1zM22 17h2v1h-2zM25 17h1v1h-1zM28 17h2v1h-2zM33 17h1v1h-1zM2 18h4v1h-4zM7 18h3v1h-3zM15 18h2v1h-2zM22 18h3v1h-3zM26 18h1v1h-1zM28 18h1v1h-1zM30 18h1v1h-1zM33 18h1v1h-1zM4 19h1v1h-1zM10 19h1v1h-1zM15 19h1v1h-1zM25 19h3v1h-3zM29 19h1v1h-1zM31 19h1v1h-1zM33 19h1v1h-1zM2 20h1v1h-1zM4 20h2v1h-2zM7 20h4v1h-4zM12 20h1v1h-1zM14 20h2v1h-2zM17 20h4v1h-4zM23 20h1v1h-1zM26 20h2v1h-2zM32 20h3v1h-3zM2 21h3v1h-3zM9 21h1v1h-1zM12 21h1v1h-1zM15 21h4v1h-4zM21 21h1v1h-1zM24 21h1v1h-1zM27 21h3v1h-3zM2 22h1v1h-1zM4 22h1v1h-1zM8 22h2v1h-2zM12 22h2v1h-2zM18 22h1v1h-1zM20 22h1v1h-1zM22 22h1v1h-1zM25 22h1v1h-1zM27 22h1v1h-1zM33 22h1v1h-1zM3 23h5v1h-5zM9 23h1v1h-1zM12 23h5v1h-5zM18 23h4v1h-4zM23 23h1v1h-1zM26 23h1v1h-1zM28 23h1v1h-1zM32 23h3v1h-3zM2 24h3v1h-3zM7 24h2v1h-2zM10 24h1v1h-1zM14 24h1v1h-1zM17 24h3v1h-3zM21 24h1v1h-1zM24 24h1v1h-1zM27 24h1v1h-1zM29 24h4v1h-4zM34 24h1v1h-1zM3 25h1v1h-1zM5 25h1v1h-1zM12 25h1v1h-1zM15 25h4v1h-4zM20 25h5v1h-5zM27 25h1v1h-1zM30 25h2v1h-2zM2 26h1v1h-1zM5 26h2v1h-2zM8 26h2v1h-2zM11 26h2v1h-2zM14 26h2v1h-2zM17 26h1v1h-1zM19 26h2v1h-2zM22 26h2v1h-2zM26 26h5v1h-5zM34 26h1v1h-1zM10 27h3v1h-3zM14 27h3v1h-3zM18 27h2v1h-2zM21 27h4v1h-4zM26 27h1v1h-1zM30 27h2v1h-2zM33 27h2v1h-2zM2 28h7v1h-7zM10 28h1v1h-1zM13 28h2v1h-2zM16 28h2v1h-2zM20 28h1v1h-1zM24 28h1v1h-1zM26 28h1v1h-1zM28 28h1v1h-1zM30 28h4v1h-4zM2 29h1v1h-1zM8 29h1v1h-1zM10 29h1v1h-1zM14 29h1v1h-1zM17 29h3v1h-3zM22 29h3v1h-3zM26 29h1v1h-1zM30 29h1v1h-1zM34 29h1v1h-1zM2 30h1v1h-1zM4 30h3v1h-3zM8 30h1v1h-1zM11 30h1v1h-1zM13 30h1v1h-1zM15 30h3v1h-3zM19 30h1v1h-1zM22 30h1v1h-1zM26 30h6v1h-6zM33 30h2v1h-2zM2 31h1v1h-1zM4 31h3v1h-3zM8 31h1v1h-1zM10 31h1v1h-1zM14 31h3v1h-3zM18 31h2v1h-2zM21 31h1v1h-1zM23 31h3v1h-3zM28 31h1v1h-1zM30 31h1v1h-1zM33 31h1v1h-1zM2 32h1v1h-1zM4 32h3v1h-3zM8 32h1v1h-1zM11 32h3v1h-3zM15 32h1v1h-1zM17 32h2v1h-2zM20 32h3v1h-3zM26 32h1v1h-1zM30 32h1v1h-1zM34 32h1v1h-1zM2 33h1v1h-1zM8 33h1v1h-1zM10 33h4v1h-4zM15 33h1v1h-1zM17 33h1v1h-1zM19 33h5v1h-5zM25 33h2v1h-2zM2 34h7v1h-7zM12 34h1v1h-1zM14 34h1v1h-1zM16 34h4v1h-4zM21 34h1v1h-1zM23 34h2v1h-2zM26 34h1v1h-1zM28 34h1v1h-1zM30 34h2v1h-2zM33 34h1v1h-1z"/></svg></div>
+      <div class="qrurl" id="rapUrl"></div>
+      <div class="qrsay">
+        <b>What to say</b>
+        <p>"Scan this, or type that address. It takes four minutes. Finish it and you are back on the sideline tomorrow. You do not have to, and either way you are welcome back tomorrow. We would just rather have you here."</p>
+      </div>
+    </div>
+    <div class="m-f">
+      <button class="btn ghost" onclick="closeModal('rapBg')">Close</button>
+      <button class="btn ice" onclick="window.print()">Print</button>
+    </div>
+  </div>
+</div>
+
+<!-- emergency modal -->
+<div class="mbg" id="sosBg" onclick="if(event.target===this)closeModal('sosBg')">
+  <div class="modal">
+    <div class="m-h"><b>What is happening?</b><i id="sosWho">Site staff are alerted immediately</i></div>
+    <div class="m-b">
+      <div class="reasons">
+        <button onclick="sendSos('Medical')"><b>Medical</b><i>Injury that needs more than a sideline can give</i></button>
+        <button onclick="sendSos('Referee safety')"><b>Referee safety</b><i>A referee is being threatened or is not safe</i></button>
+        <button onclick="sendSos('Spectator or parent')"><b>Spectator or parent</b><i>Someone will not leave or will not stop</i></button>
+        <button onclick="sendSos('Fight or violence')"><b>Fight or violence</b><i>Physical altercation on or near the field</i></button>
+        <button onclick="sendSos('Other')"><b>Other</b><i>Something else that needs staff now</i></button>
+      </div>
+    </div>
+    <div class="m-f"><button class="btn ghost" onclick="closeModal('sosBg')">Never mind</button></div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+var BACKEND = (window.JAR && JAR.BACKEND) || 'https://script.google.com/macros/s/AKfycbxQXvVq-gtGfUvgXF3NJXkFU_4aVlqFclU0bF0B0dQWbpjb42tstU7UnbKLf5DFP3PY/exec';
+var EV     = (window.JAR && JAR.EVENT) || {};
+var EVENT  = (window.JAR && JAR.id) || 'steamboat';
+var DATES  = EV.dates  || [];
+var DAYLBL = EV.daylbl || {};
+
+var S = { date:pickDate(), refs:[], refName:'', myGames:[], staff:null,
+          pin:'', board:null, scGame:null, scMode:'ref', demo:false,
+          view:'games', incidents:[] };
+
+function pickDate(){
+  var n=new Date(), m=n.getMonth()+1, d=n.getDate();
+  var t=n.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(d<10?'0':'')+d;
+  if(DATES.indexOf(t)>=0) return t;
+  var past=null; for(var i=0;i<DATES.length;i++){ if(DATES[i]<=t) past=DATES[i]; }
+  return past || DATES[0];
+}
+/* ══ BRANDING FROM CONFIG ══════════════════════════════════
+   Everything tournament-specific on this page is painted here from
+   config.js. No event name, date, venue or address is hardcoded below
+   this line -- that is the whole point of one shared hub. */
+function paintBrand(){
+  var H = (window.JAR && JAR.HOUSE) || {};
+  document.title = EV.full || 'Colorado Referee Hub';
+  setTxt('brShield', EV.shield || '');
+  setTxt('brName',   EV.name   || 'Referee Hub');
+  setTxt('brSub',    'REFEREE HUB' + (EV.shield ? ' \u00b7 ' + EV.shield : ''));
+  setTxt('wxDesc',   EV.weatherPlace || '');
+  setTxt('rapUrl',   EV.rapUrl || 'jareferee.com/rap');
+  setTxt('sosWho',   (EV.alertWho || 'Site staff') + ' are alerted immediately');
+
+  // Hero
+  setTxt('hKicker', DATES.length
+    ? DATES.map(function(d){ return JAR.dayLabel(d); }).join(' \u00b7 ')
+    : '');
+  var hn = document.getElementById('hName');
+  if (hn) hn.textContent = EV.name || 'Colorado Referee Hub';
+  setTxt('hSub', EV.subtitle || '');
+
+  if (EV.accent) {
+    try { document.documentElement.style.setProperty('--accent', EV.accent); } catch(e){}
+  }
+
+  paintVenues();
+  paintLogos(H);
+}
+
+function setTxt(id, v){ var el=document.getElementById(id); if(el) el.textContent=v; }
+
+function paintVenues(){
+  var box=document.getElementById('hVenues'); if(!box) return;
+  var list=EV.venueInfo||[];
+  if(!list.length){ box.innerHTML='<div class="empty">Venue list loads with the schedule.</div>'; return; }
+  box.innerHTML=list.map(function(v){
+    return '<a class="ven" target="_blank" rel="noopener" href="'+
+      'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(v.map||v.name)+'">'+
+      '<div class="ven-n"><b>'+esc(v.name)+'</b><i>'+esc(v.fields||'')+
+        (v.addr?' &nbsp;\u00b7&nbsp; '+esc(v.addr):'')+'</i></div>'+
+      (v.games?'<div class="ven-g">'+v.games+'<span>games</span></div>':'')+
+      '<div class="ven-dir">Directions \u25b8</div></a>';
+  }).join('');
+}
+
+function paintLogos(H){
+  var blk=document.getElementById('hLogosBlk'), box=document.getElementById('hLogos');
+  if(!blk||!box) return;
+  var logos=EV.logos||[];
+  if(!logos.length){ blk.style.display='none'; return; }
+  blk.style.display='';
+  box.innerHTML=logos.map(function(l){
+    var img='<img src="'+esc(l.src)+'" alt="'+esc(l.alt||l.name)+'" loading="lazy" '+
+            'style="max-width:100%;height:auto;border-radius:9px;display:block">';
+    return l.url
+      ? '<a href="'+esc(l.url)+'" target="_blank" rel="noopener" style="display:block;margin-bottom:11px">'+img+'</a>'
+      : '<div style="margin-bottom:11px">'+img+'</div>';
+  }).join('');
+}
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function mins(t){var m=String(t||'').match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if(!m)return 9999;var h=+m[1],mi=+m[2],ap=m[3].toUpperCase();
+  if(ap==='PM'&&h!==12)h+=12; if(ap==='AM'&&h===12)h=0; return h*60+mi;}
+function nowMins(){var n=new Date();return n.getHours()*60+n.getMinutes();}
+function api(action,params){
+  var q=Object.keys(params||{}).map(function(k){return k+'='+encodeURIComponent(params[k]);}).join('&');
+  return fetch(BACKEND+'?action='+action+(q?'&'+q:'')).then(function(r){return r.json();});
+}
+function post(body){
+  return fetch(BACKEND,{method:'POST',body:JSON.stringify(body)}).then(function(r){return r.json();});
+}
+function show(id){
+  ['s-home','s-pick','s-ref','s-staff'].forEach(function(x){
+    document.getElementById(x).classList.toggle('on',x===id);});
+  document.getElementById('backBtn').style.display = id==='s-home' ? 'none' : 'inline-block';
+  window.scrollTo(0,0);
+}
+function goHome(){ show('s-home'); }
+function toggleStaff(){
+  var b=document.getElementById('pinBox');
+  var open = b.style.display==='none';
+  b.style.display = open ? 'block' : 'none';
+  if(open) setTimeout(function(){ document.getElementById('pin').focus(); },60);
+}
+function closeModal(id){ document.getElementById(id).classList.remove('on'); }
+function toggleWx(){
+  var b=document.getElementById('wxBody'), on=b.classList.toggle('on');
+  document.getElementById('wxMore').textContent = on?'policy ▴':'policy ▾';
+}
+function markDemo(){ S.demo=true; document.getElementById('demoBar').classList.add('on'); }
+
+/* ── referee flow ── */
+function demoRefs(){ return EVENT==='steamboat' ? DEMO_REFS : []; }
+function demoGames(){ return EVENT==='steamboat' ? DEMO_GAMES : []; }
+var DEMO_REFS = ['Aaron Balderramo','Alan Valdez-Ruiz','Andrew Breibart','Benjamin Tronnier',
+ 'Bowen Taylor','Brian Drake','Brooke Kliewer','Bryan Robinson','Cafer Akdeniz','Charles Welch',
+ 'Daniel Martinez','Elsa DeLeon','Emmitt Lutz','Francisco Diaz','Genaro Sosa (Arizona/Colorado)',
+ 'Gerald Horak','Gus Hoppin','Jim Gerson','JoDee Shufelt','Jon Kliewer','Jonathan Pierce',
+ 'Kerem Gurkan','Maria Valdez','Mario Balderrama','Mason Peterson','Mason Vogel','Matthew Bowe',
+ 'Michael Mower','Miles Goldsmith','Nikesha Gage','Owen Gallagher','Rebecca Greenberg',
+ 'Seth Witherspoon','Thomas Roth','Tucker Austin'].map(function(n){return {name:n,games:0};});
+
+var DEMO_GAMES = [
+ {gameId:'d1',gameNumber:'SMS165223',time:'8:00 AM',venue:'Emerald Park',field:'Dudley',
+  division:'U13/14 Boys',home:'Steamboat Tournament U13B',away:'Chivas Denver U13 Select',
+  position:'CR',checkedIn:true,homeScore:1,awayScore:2,scoreStatus:'Final'},
+ {gameId:'d2',gameNumber:'SMS165231',time:'11:00 AM',venue:'Emerald Park',field:'South',
+  division:'U13/14 Boys',home:'Alpine United U13B',away:'Laramie 2013/2014 boys',
+  position:'AR1',checkedIn:false,homeScore:null,awayScore:null,scoreStatus:''},
+ {gameId:'d3',gameNumber:'SMS165249',time:'2:15 PM',venue:'Emerald Park',field:'North2',
+  division:'U11/12 Boys',home:'AC FC',away:'Blackhawks 15',
+  position:'CR',checkedIn:false,homeScore:null,awayScore:null,scoreStatus:''}
+];
+
+function goRefPick(){
+  show('s-pick');
+  document.getElementById('refSearch').value='';
+  document.getElementById('refList').innerHTML=
+    '<div class="empty">Loading today\'s crew…</div>';
+  api('eventRefs',{date:S.date}).then(function(r){
+    S.refs = (r&&r.status==='ok'&&r.data&&r.data.length) ? r.data : (markDemo(),demoRefs());
+    filterRefs();
+    setTimeout(function(){document.getElementById('refSearch').focus();},80);
+  }).catch(function(){ markDemo(); S.refs=demoRefs(); filterRefs(); });
+}
+
+function filterRefs(){
+  var q=(document.getElementById('refSearch').value||'').toLowerCase().trim();
+  var list=S.refs;
+  if(q.length>=1) list=S.refs.filter(function(r){return r.name.toLowerCase().indexOf(q)>=0;});
+  else list=S.refs.slice(0,8);
+  var el=document.getElementById('refList');
+  if(!list.length){ el.innerHTML='<div class="empty"><b>No match</b>Check the spelling, or ask Joe at HQ.</div>'; return; }
+  el.innerHTML=list.map(function(r){
+    return '<button class="refrow" onclick="pickRef('+JSON.stringify(r.name).replace(/"/g,'&quot;')+')">'+
+      '<b>'+esc(r.name)+'</b>'+(r.games?'<i>'+r.games+' game'+(r.games===1?'':'s')+'</i>':'')+'</button>';
+  }).join('');
+}
+
+function pickRef(name){
+  S.refName=name;
+  try{ localStorage.setItem('jar-ref-'+EVENT,name); }catch(e){}
+  show('s-ref');
+  var h=new Date().getHours();
+  document.getElementById('refGreet').textContent =
+    h<12?'Good morning':(h<17?'Good afternoon':'Good evening');
+  document.getElementById('refName').textContent=name;
+  document.getElementById('refBody').innerHTML='<div class="empty">Loading your day…</div>';
+  loadMyGames();
+}
+
+function loadMyGames(){
+  api('eventMyGames',{refName:S.refName,date:S.date}).then(function(r){
+    if(r&&r.status==='ok'&&r.data){ S.myGames=r.data; }
+    else { markDemo(); S.myGames=demoGames(); }
+    renderRef();
+  }).catch(function(){ markDemo(); S.myGames=demoGames(); renderRef(); });
+}
+
+function renderRef(){
+  var el=document.getElementById('refBody');
+  if(!S.myGames.length){
+    el.innerHTML='<div class="empty"><b>Nothing today</b>No '+esc(EV.shield||'tournament')+' games on this date for '+esc(S.refName)+'.</div>';
+    return;
+  }
+  var now=nowMins();
+  var next=null;
+  for(var i=0;i<S.myGames.length;i++){
+    var g=S.myGames[i];
+    if(g.canceled) continue;
+    if(g.scoreStatus) continue;
+    if(mins(g.time)+110 >= now){ next=g; break; }
+  }
+  if(!next) next=S.myGames.filter(function(g){
+    return !g.scoreStatus && !g.canceled; })[0]||null;
+
+  var html='';
+  if(next){
+    var live = mins(next.time)<=now && mins(next.time)+110>=now;
+    html+='<div class="next">'+
+      '<div class="k">'+(live?'Happening now':'Up next')+'</div>'+
+      '<div class="next-top">'+
+        '<div class="pos">'+esc(next.position)+'</div>'+
+        '<div class="next-when"><b>'+esc(next.time)+'</b>'+
+          '<i>'+esc(next.venue)+(next.field?' · '+esc(next.field):'')+'</i></div>'+
+      '</div>'+
+      '<div class="next-match">'+esc(next.home)+'<br>'+esc(next.away)+'</div>'+
+      '<div class="next-meta">'+esc(next.division)+' · #'+esc(next.gameNumber)+'</div>'+
+      '<div class="next-acts">'+
+        (next.checkedIn
+          ? '<button class="btn done" disabled>✓ Checked in</button>'
+          : '<button class="btn go" onclick="checkIn(\''+next.gameId+'\')">Check in at '+esc(shortVenue(next.venue))+'</button>')+
+        '<button class="btn ice" onclick="openScore(\''+next.gameId+'\')">'+
+          (next.scoreStatus?'Edit score':'Post score')+'</button>'+
+      '</div>'+
+      '<div class="next-acts" style="margin-top:8px">'+
+        '<a class="btn ice" style="text-align:center;text-decoration:none" href="'+rosterHref(next)+'">Game card</a>'+
+        '<a class="btn ghost" style="text-align:center;text-decoration:none" href="'+incHref(next)+'">Report</a>'+
+      '</div></div>';
+  }
+
+  var rest=S.myGames.filter(function(g){ return !next || g.gameId!==next.gameId; });
+  if(rest.length){
+    html+='<div class="sec"><div class="sec-h"><h3>Rest of your day</h3>'+
+      '<div class="rule"></div><span class="n">'+rest.length+'</span></div>'+
+      rest.map(gameRow).join('')+'</div>';
+  }
+  var info=EV.refInfo||[];
+  if(info.length){
+    html+='<div class="sec"><div class="sec-h"><h3>Tournament info</h3><div class="rule"></div></div>'+
+      info.map(function(x){
+        return '<div class="info"><b>'+esc(x.h)+'</b><p>'+x.p+'</p></div>';
+      }).join('')+'</div>';
+  }
+  el.innerHTML=html;
+}
+
+function shortVenue(v){
+  return (window.JAR && JAR.short) ? JAR.short(v) : String(v||'');
+}
+function gameRow(g){
+  // A cancelled game stays on the schedule -- cancelled "with pay" is money
+  // the referee is owed and must not vanish -- but it offers no check-in, no
+  // score and no card, so it can never be mistaken for a fixture to work.
+  if(g.canceled){
+    var pay = (g.cancelPayType||'').indexOf('with')>=0 ? 'Cancelled · with pay'
+            : (g.cancelPayType ? 'Cancelled · no pay' : 'Cancelled');
+    return '<div class="gm past" style="opacity:.62">'+
+      '<div class="gm-top"><div class="pos-sm">'+esc(g.position)+'</div>'+
+        '<div class="gm-when"><b style="text-decoration:line-through">'+esc(g.time)+
+          '</b><i>#'+esc(g.gameNumber)+'</i></div>'+
+        '<span class="gm-badge out">'+esc(pay)+'</span></div>'+
+      '<div class="gm-match" style="text-decoration:line-through">'+
+        esc(g.home)+' vs '+esc(g.away)+'</div>'+
+      '<div class="gm-meta">'+esc(g.venue)+(g.field?' · '+esc(g.field):'')+
+        ' · '+esc(g.division)+'</div>'+
+    '</div>';
+  }
+  var done = !!g.scoreStatus;
+  var badge = done
+    ? '<span class="gm-badge fin">'+esc(g.scoreStatus)+'</span>'
+    : (g.checkedIn ? '<span class="gm-badge in">Checked in</span>'
+                   : '<span class="gm-badge out">Not yet</span>');
+  var score = done ? '<span class="gm-score">'+g.homeScore+' – '+g.awayScore+'</span>' : '';
+  return '<div class="gm'+(done?' past':'')+'">'+
+    '<div class="gm-top"><div class="pos-sm">'+esc(g.position)+'</div>'+
+      '<div class="gm-when"><b>'+esc(g.time)+'</b><i>#'+esc(g.gameNumber)+'</i></div>'+
+      badge+'</div>'+
+    '<div class="gm-match">'+esc(g.home)+' vs '+esc(g.away)+score+'</div>'+
+    '<div class="gm-meta">'+esc(g.venue)+(g.field?' · '+esc(g.field):'')+' · '+esc(g.division)+'</div>'+
+    '<div class="gm-acts">'+
+      (g.checkedIn?'<button class="btn done" disabled>✓ In</button>'
+                  :'<button class="btn go" onclick="checkIn(\''+g.gameId+'\')">Check in</button>')+
+      '<button class="btn ghost" onclick="openScore(\''+g.gameId+'\')">'+(done?'Edit score':'Score')+'</button>'+
+    '</div>'+
+    '<div class="gm-acts" style="margin-top:7px">'+
+      '<a class="btn ghost" style="text-align:center;text-decoration:none" href="'+rosterHref(g)+'">Game card</a>'+
+      '<a class="btn ghost" style="text-align:center;text-decoration:none" href="'+incHref(g)+'">Report</a>'+
+    '</div>'+
+  '</div>';
+}
+
+// One tap checks the referee in for every game they have at that venue.
+// Optimistic so the button responds instantly, and guarded so a second tap
+// during a slow request cannot fire a duplicate.
+var _checkingIn = false;
+function checkIn(gameId){
+  if(_checkingIn) return;
+  var g=null; S.myGames.forEach(function(x){ if(x.gameId===gameId) g=x; });
+  if(!g) return;
+  _checkingIn = true;
+
+  // mark every game at this venue immediately
+  var touched=[];
+  S.myGames.forEach(function(x){
+    if(x.venue===g.venue && !x.checkedIn){ x.checkedIn=true; touched.push(x.gameId); }
+  });
+  renderRef();
+
+  if(S.demo){ _checkingIn=false; return; }
+
+  post({action:'checkinVenue',refName:S.refName,date:S.date,venue:g.venue})
+    .then(function(r){
+      _checkingIn=false;
+      if(!r||r.status!=='ok'){
+        touched.forEach(function(id){ bump(id,{checkedIn:false}); });
+        renderRef();
+        alert((r&&r.message)||'Check in failed. Try again.');
+      }
+    })
+    .catch(function(){
+      _checkingIn=false;
+      touched.forEach(function(id){ bump(id,{checkedIn:false}); });
+      renderRef();
+      alert('No signal. Nothing was recorded, try again in a moment.');
+    });
+}
+function bump(gameId,patch){
+  S.myGames.forEach(function(g){ if(g.gameId===gameId) for(var k in patch) g[k]=patch[k]; });
+}
+
+function openScore(gameId,mode){
+  var g=null;
+  (S.scMode==='staff'&&S.board? S.board:S.myGames).forEach(function(x){ if(x.gameId===gameId) g=x; });
+  if(!g && S.board) S.board.forEach(function(x){ if(x.gameId===gameId) g=x; });
+  if(!g) S.myGames.forEach(function(x){ if(x.gameId===gameId) g=x; });
+  if(!g) return;
+  S.scGame=g; S.scMode=mode||'ref';
+  document.getElementById('scTitle').textContent = S.scMode==='staff'?'Confirm score':'Final score';
+  document.getElementById('scSub').textContent =
+    '#'+(g.gameNumber||'')+' · '+(g.venue||'')+(g.field?' · '+g.field:'');
+  document.getElementById('scHomeName').textContent=g.home||'Home';
+  document.getElementById('scAwayName').textContent=g.away||'Away';
+  document.getElementById('scHome').value = g.homeScore==null?'':g.homeScore;
+  document.getElementById('scAway').value = g.awayScore==null?'':g.awayScore;
+  document.getElementById('scNudge').style.display='none';
+  document.getElementById('scPad').style.display='';
+  document.getElementById('scFoot').innerHTML=
+    '<button class="btn ghost" onclick="closeModal(\'scoreBg\')">Cancel</button>'+
+    '<button class="btn ice" id="scSave" onclick="saveScore()">'+
+      (S.scMode==='staff'?'Save':'Post score')+'</button>';
+  document.getElementById('scoreBg').classList.add('on');
+  setTimeout(function(){document.getElementById('scHome').focus();},90);
+}
+
+// The Assignr reminder does not time out. It waits for a deliberate tap,
+// because that reminder is the whole reason referees get paid on time.
+function showNudge(){
+  document.getElementById('scTitle').textContent='Score is live';
+  document.getElementById('scSub').textContent='Now finish it in Assignr';
+  document.getElementById('scNudge').style.display='block';
+  document.getElementById('scPad').style.display='none';
+  document.getElementById('scFoot').innerHTML=
+    '<a class="btn ghost" style="text-align:center;text-decoration:none" href="'+
+      incHref(S.scGame||{gameId:''})+'">File a report</a>'+
+    '<button class="btn go" onclick="closeModal(\'scoreBg\')">I will do it in Assignr</button>';
+}
+
+function saveScore(){
+  var g=S.scGame; if(!g) return;
+  var hs=document.getElementById('scHome').value.trim();
+  var as=document.getElementById('scAway').value.trim();
+  if(hs===''||as===''||isNaN(+hs)||isNaN(+as)){ alert('Both scores are needed.'); return; }
+  var btn=document.getElementById('scSave'); btn.disabled=true; btn.textContent='Saving…';
+
+  if(S.demo){
+    bump(g.gameId,{homeScore:+hs,awayScore:+as,scoreStatus:S.scMode==='staff'?'Final':'Reported'});
+    if(S.scMode==='staff'){ closeModal('scoreBg'); renderStaff(); }
+    else { renderRef(); showNudge(); }
+    return;
+  }
+
+  var body = S.scMode==='staff'
+    ? {action:'confirmScore',pin:S.pin,gameId:g.gameId,confirmedBy:(S.staff&&S.staff.name)||'staff',
+       homeScore:+hs,awayScore:+as,date:S.date}
+    : {action:'refScore',refName:S.refName,gameId:g.gameId,
+       homeScore:+hs,awayScore:+as,date:S.date};
+
+  post(body).then(function(r){
+    if(r&&r.status==='ok'){
+      if(S.scMode==='staff'){ closeModal('scoreBg'); loadBoard(); }
+      else{
+        bump(g.gameId,{homeScore:+hs,awayScore:+as,scoreStatus:'Reported'});
+        renderRef();
+        showNudge();
+      }
+    } else { btn.disabled=false; btn.textContent='Post score'; alert((r&&r.message)||'Could not save'); }
+  }).catch(function(){ btn.disabled=false; btn.textContent='Post score'; alert('No signal. Try again.'); });
+}
+
+/* ── staff ── */
+function doAuth(){
+  var pin=(document.getElementById('pin').value||'').trim();
+  var err=document.getElementById('pinErr'); err.textContent='';
+  if(pin.length<4){ err.textContent='Four digits.'; return; }
+  post({action:'auth',pin:pin}).then(function(r){
+    if(r&&r.status==='ok'){
+      S.pin=pin; S.staff=r;
+      if(r.role==='coach'||!r.caps){ err.textContent='That PIN has no tournament access.'; return; }
+      document.getElementById('pin').value='';
+      document.getElementById('staffName').textContent=r.name||'Staff';
+      document.getElementById('staffRole').textContent=
+        (r.role==='director'?'Tournament Director':r.role==='sc'?'Site Coordinator':
+         r.role==='admin'?'Admin':r.role)+' \u00b7 '+(EV.shield||'');
+      show('s-staff'); renderDays(); loadBoard();
+    } else { err.textContent=(r&&r.message)||'PIN not recognised.'; }
+  }).catch(function(){ err.textContent='Cannot reach the server right now.'; });
+}
+
+function renderDays(){
+  document.getElementById('staffDays').innerHTML = DATES.map(function(d){
+    return '<button aria-pressed="'+(d===S.date)+'" onclick="setDay(\''+d+'\')">'+
+      '<b>'+DAYLBL[d][0]+'</b><i>'+DAYLBL[d][1]+'</i></button>';
+  }).join('');
+}
+function setDay(d){ S.date=d; renderDays(); loadBoard(); }
+
+function loadBoard(){
+  loadStaffMessage();
+  refreshBadges();
+  if(S.view==='incidents'){ loadIncidents(); }
+  else if(S.view==='sitout'){ loadSitOut(); }
+  else if(S.view==='roster'){ loadRosterIssues(); }
+  else document.getElementById('staffBody').innerHTML='<div class="empty">Loading…</div>';
+  api('eventBoard',{date:S.date}).then(function(r){
+    if(r&&r.status==='ok'){ S.board=r.data; renderStats(r.summary); if(S.view==='games') keepScroll(renderStaff); }
+    else { document.getElementById('staffBody').innerHTML='<div class="empty"><b>No data</b>Deploy the backend, then reload.</div>'; }
+  }).catch(function(){
+    document.getElementById('staffBody').innerHTML='<div class="empty"><b>Offline</b>Cannot reach the server.</div>';
+  });
+  loadAlerts();
+}
+
+function loadAlerts(){
+  var caps=(S.staff&&S.staff.caps)||{};
+  var parts={emg:'',ros:''};
+  var paint=function(){ document.getElementById('staffAlerts').innerHTML=parts.emg+parts.ros; };
+
+  // Roster write-ins waiting on a decision. The referee sees this get picked up.
+  if(caps.rosterApproval){
+    api('rosterIssues',{pin:S.pin,date:S.date}).then(function(r){
+      if(!r||r.status!=='ok'){ parts.ros=''; paint(); return; }
+      var open=(r.data||[]).filter(function(x){
+        return x.approval==='pending'||x.approval==='seen';});
+      badge('rosBadge',(r.data||[]).filter(function(x){return x.approval==='pending';}).length);
+      parts.ros=open.slice(0,4).map(function(x){
+        var seen=x.approval==='seen';
+        return '<div class="alertbar roster"><b>Roster · '+esc(x.player)+
+            (x.jersey?' #'+esc(x.jersey):'')+'</b>'+
+          '<p>'+esc(x.team)+(x.gameNumber?' · game #'+esc(x.gameNumber):'')+
+            ' · added by '+esc(x.checkedBy||'a referee')+'</p>'+
+          (seen?'<div class="enr">'+esc(x.resolvedBy||'Someone')+' is looking at it</div>':'')+
+          '<div class="acts">'+
+            (seen?'':'<button onclick="rosAck('+x.rowNum+',\'seen\',this)">I am on it</button>')+
+            '<button onclick="rosAck('+x.rowNum+',\'approved\',this)">Approve</button>'+
+            '<button onclick="rosAck('+x.rowNum+',\'denied\',this)">Deny</button>'+
+          '</div></div>';
+      }).join('');
+      paint();
+    }).catch(function(){});
+  }
+
+  api('emergencies',{openOnly:'1'}).then(function(r){
+    if(r&&r.status==='ok'&&r.data&&r.data.length){
+      parts.emg=r.data.slice(0,3).map(function(a){
+        var enr = a.status==='enroute';
+        return '<div class="alertbar"><b>🚨 '+esc(a.reason)+'</b>'+
+          '<p>'+esc(a.refName)+' · '+esc(a.venue||'location unknown')+
+          (a.field?' · '+esc(a.field):'')+'</p>'+
+          (enr?'<div class="enr">'+esc(a.ackBy||'Someone')+' is on the way</div>':'')+
+          '<div class="acts">'+
+            (enr?'':'<button onclick="ackEmg('+a.rowNum+',\'enroute\',this)">I am on my way</button>')+
+            '<button onclick="ackEmg('+a.rowNum+',\'handled\',this)">Handled</button>'+
+          '</div></div>';
+      }).join('');
+    } else parts.emg='';
+    paint();
+  }).catch(function(){ paint(); });
+}
+
+// Acknowledge or decide straight from the alert, so the referee's card updates.
+function rosAck(rowNum,how,btn){
+  if(btn.disabled) return;
+  btn.disabled=true; btn.textContent='…';
+  post({action:'resolveRoster',pin:S.pin,rowNum:rowNum,approval:how,
+        resolvedBy:(S.staff&&S.staff.name)||'staff'})
+    .then(function(r){
+      if(r&&r.status==='ok'){ loadAlerts(); if(S.view==='roster') loadRosterIssues(); }
+      else { btn.disabled=false; alert((r&&r.message)||'Could not update'); }
+    })
+    .catch(function(){ btn.disabled=false; alert('No signal.'); });
+}
+
+function ackEmg(rowNum,how,btn){
+  if(btn.disabled) return;
+  btn.disabled=true; btn.textContent=how==='enroute'?'Sending…':'Clearing…';
+  post({action:'ackEmergency',pin:S.pin,rowNum:rowNum,ackStatus:how,
+        ackBy:(S.staff&&S.staff.name)||'staff'})
+    .then(function(r){
+      if(r&&r.status==='ok'){ btn.classList.add('on'); loadBoard(); }
+      else { btn.disabled=false; btn.textContent=how==='enroute'?'I am on my way':'Handled';
+             alert((r&&r.message)||'Could not update'); }
+    })
+    .catch(function(){ btn.disabled=false; alert('No signal.'); });
+}
+
+function refreshBadges(){
+  api('incidents',{pin:S.pin,date:S.date}).then(function(r){
+    if(r&&r.status==='ok') badge('incBadge',(r.data||[]).filter(function(i){return i.status==='open';}).length);
+  }).catch(function(){});
+  api('sitOutList',{pin:S.pin}).then(function(r){
+    if(r&&r.status==='ok') badge('sitBadge',(r.data||[]).filter(function(x){return !x.rapCompleted;}).length);
+  }).catch(function(){});
+  api('rosterIssues',{pin:S.pin,date:S.date}).then(function(r){
+    if(r&&r.status==='ok') badge('rosBadge',(r.data||[]).filter(function(x){return x.approval==='pending';}).length);
+  }).catch(function(){});
+}
+
+function renderStats(s){
+  if(!s) return;
+  document.getElementById('staffStats').innerHTML=
+    '<div class="stat"><b>'+s.games+'</b><i>games</i></div>'+
+    '<div class="stat"><b>'+s.refsCheckedIn+'/'+s.refsTotal+'</b><i>checked in</i></div>'+
+    '<div class="stat'+(s.reported?' warn':'')+'"><b>'+s.reported+'</b><i>to confirm</i></div>'+
+    '<div class="stat'+(s.noCrew?' warn':'')+'"><b>'+s.noCrew+'</b><i>no crew</i></div>';
+}
+
+function rosterHref(g){
+  return 'roster.html?gameId='+encodeURIComponent(g.gameId)+
+         '&date='+encodeURIComponent(S.date)+
+         '&by='+encodeURIComponent(S.refName||'');
+}
+
+function incHref(g){
+  return 'incident.html?gameId='+encodeURIComponent(g.gameId)+
+         '&date='+encodeURIComponent(S.date)+
+         '&by='+encodeURIComponent(S.refName||'');
+}
+
+function setView(v,btn){
+  S.view=v;
+  document.querySelectorAll('#vtabs button').forEach(function(b){
+    b.setAttribute('aria-pressed',b===btn);});
+  if(v==='games')          renderStaff();
+  else if(v==='incidents') loadIncidents();
+  else if(v==='roster')    loadRosterIssues();
+  else                     loadSitOut();
+}
+
+function loadStaffMessage(){
+  var el=document.getElementById('staffMsg');
+  api('eventMessage',{pin:S.pin,date:S.date}).then(function(r){
+    if(r&&r.status==='ok'&&r.message){
+      el.innerHTML='<div class="msgcard"><div class="k">'+
+        (r.slot==='pm'?'This evening':'This morning')+'</div><p>'+esc(r.message)+'</p></div>';
+    } else el.innerHTML='';
+  }).catch(function(){ el.innerHTML=''; });
+}
+
+function loadIncidents(){
+  var el=document.getElementById('staffBody');
+  el.innerHTML='<div class="empty">Loading reports…</div>';
+  api('incidents',{pin:S.pin,date:S.date}).then(function(r){
+    if(!r||r.status!=='ok'){
+      el.innerHTML='<div class="empty"><b>No access</b>'+((r&&r.message)||'Could not load reports.')+'</div>';
+      return;
+    }
+    S.incidents=r.data||[];
+    badge('incBadge',S.incidents.filter(function(i){return i.status==='open';}).length);
+    if(!S.incidents.length){
+      el.innerHTML='<div class="empty"><b>Nothing reported</b>No incidents filed for this day. Good sign.</div>';
+      return;
+    }
+    var caps=(S.staff&&S.staff.caps)||{};
+    el.innerHTML='<div class="sec">'+S.incidents.map(function(i){return incRow(i,caps);}).join('')+'</div>';
+  }).catch(function(){
+    el.innerHTML='<div class="empty"><b>Offline</b>Cannot reach the server.</div>';
+  });
+}
+
+function incRow(i,caps){
+  var urgent=['VC','S','AL','SFP'].indexOf(String(i.code||'').toUpperCase())>=0||i.discriminatory;
+  var cls='inc'+(urgent?' urgent':'')+(i.status!=='open'?' closed':'');
+  var tags='';
+  if(i.discriminatory) tags+='<span class="tag red">Discriminatory · '+esc(i.characteristic)+'</span>';
+  if(i.sitOut) tags+='<span class="tag '+(i.rapStatus==='completed'?'green':'amber')+'">'+
+    (i.rapStatus==='completed'?'RAP completed':'Sit out')+'</span>';
+  if(i.mode==='full') tags+='<span class="tag">Full USSF</span>';
+  tags+='<span class="tag">'+esc(i.status)+'</span>';
+  var act=(caps.closeIncident&&i.status==='open')
+    ? '<div class="gm-acts"><button class="btn ghost" onclick="closeInc('+i.rowNum+')">Mark reviewed</button></div>'
+    : '';
+  return '<div class="'+cls+'">'+
+    '<div class="inc-top">'+(i.code?'<span class="inc-code">'+esc(i.code)+'</span>':'')+
+      '<span class="inc-who">'+esc(i.personName)+'</span></div>'+
+    '<div class="inc-meta">'+[i.type,i.personTeam,i.gameNumber?'#'+i.gameNumber:'',i.venue,i.field]
+      .filter(Boolean).map(esc).join(' · ')+'</div>'+
+    '<div class="inc-narr" onclick="this.classList.toggle(\'open\')">'+esc(i.narrative)+'</div>'+
+    '<div class="inc-tags">'+tags+'</div>'+
+    '<div class="inc-meta" style="margin:8px 0 0">Filed by '+esc(i.submittedBy||'unknown')+'</div>'+
+    act+'</div>';
+}
+
+function closeInc(rowNum){
+  post({action:'closeIncident',pin:S.pin,rowNum:rowNum,status:'reviewed',
+        reviewedBy:(S.staff&&S.staff.name)||'staff'})
+    .then(function(r){ if(r&&r.status==='ok') loadIncidents();
+                       else alert((r&&r.message)||'Could not update'); })
+    .catch(function(){ alert('No signal.'); });
+}
+
+function loadSitOut(){
+  var el=document.getElementById('staffBody');
+  el.innerHTML='<div class="empty">Loading…</div>';
+  api('sitOutList',{pin:S.pin}).then(function(r){
+    if(!r||r.status!=='ok'){
+      el.innerHTML='<div class="empty"><b>No access</b>'+((r&&r.message)||'Could not load.')+'</div>';
+      return;
+    }
+    var list=r.data||[];
+    badge('sitBadge',list.filter(function(x){return !x.rapCompleted;}).length);
+    if(!list.length){
+      el.innerHTML='<button class="handout" onclick="openRap()">Show the sideline conduct QR</button>'+
+        '<div class="empty"><b>Nobody sitting out</b>No dismissals on record.</div>';
+      return;
+    }
+    el.innerHTML='<div class="sec">'+
+      '<button class="handout" onclick="openRap()">Show the sideline conduct QR</button>'+
+      '<div class="sec-h"><h3>Not to be on the fields</h3><div class="rule"></div>'+
+      '<span class="n">'+list.length+'</span></div>'+
+      list.map(function(x){
+        return '<div class="inc'+(x.rapCompleted?' closed':' urgent')+'">'+
+          '<div class="inc-top"><span class="inc-who">'+esc(x.name)+'</span></div>'+
+          '<div class="inc-meta">'+[x.team,x.role,x.date,x.gameNumber?'#'+x.gameNumber:'',x.venue]
+            .filter(Boolean).map(esc).join(' · ')+'</div>'+
+          '<div class="inc-tags">'+
+            (x.reason?'<span class="tag red">'+esc(x.reason)+'</span>':'')+
+            '<span class="tag '+(x.rapCompleted?'green':'amber')+'">'+
+              (x.rapCompleted?'RAP completed · cleared':'RAP not completed')+'</span>'+
+          '</div></div>';
+      }).join('')+
+      '<p class="hint" style="margin-top:12px">Staff only. None of this appears on the public scoreboard.</p>'+
+      '</div>';
+  }).catch(function(){
+    el.innerHTML='<div class="empty"><b>Offline</b>Cannot reach the server.</div>';
+  });
+}
+
+function loadRosterIssues(){
+  var el=document.getElementById('staffBody');
+  var caps=(S.staff&&S.staff.caps)||{};
+  el.innerHTML='<div class="empty">Loading…</div>';
+  api('rosterIssues',{pin:S.pin,date:S.date}).then(function(r){
+    if(!r||r.status!=='ok'){
+      el.innerHTML='<div class="empty"><b>No access</b>'+((r&&r.message)||'Could not load.')+'</div>';
+      return;
+    }
+    var list=r.data||[];
+    badge('rosBadge',list.filter(function(x){return x.approval==='pending';}).length);
+    if(!list.length){
+      el.innerHTML='<div class="empty"><b>No roster issues</b>'+
+        'Every player checked in so far was already on a roster.</div>';
+      return;
+    }
+    el.innerHTML='<div class="sec">'+list.map(function(x){
+      var cls='inc'+(x.approval==='pending'?' urgent':' closed');
+      var tag = x.approval==='approved' ? '<span class="tag green">Cleared to play</span>'
+              : x.approval==='denied'   ? '<span class="tag red">Not cleared</span>'
+              : x.approval==='seen'     ? '<span class="tag amber">Being reviewed</span>'
+              :                           '<span class="tag red">Cannot play until decided</span>';
+      var acts = (caps.rosterApproval && (x.approval==='pending'||x.approval==='seen'))
+        ? '<div class="gm-acts">'+
+            '<button class="btn go" onclick="resolveRoster('+x.rowNum+',\'approved\',this)">Approve</button>'+
+            '<button class="btn ghost" onclick="resolveRoster('+x.rowNum+',\'denied\',this)">Deny</button>'+
+          '</div>'
+        : (caps.rosterApproval
+            ? '<div class="gm-acts"><button class="btn ghost" onclick="resolveRoster('+x.rowNum+',\'pending\',this)">Reopen</button></div>'
+            : '');
+      return '<div class="'+cls+'">'+
+        '<div class="inc-top">'+(x.jersey?'<span class="inc-code">#'+esc(x.jersey)+'</span>':'')+
+          '<span class="inc-who">'+esc(x.player)+'</span></div>'+
+        '<div class="inc-meta">'+[x.team,x.gameNumber?'game #'+x.gameNumber:'',x.date]
+          .filter(Boolean).map(esc).join(' · ')+'</div>'+
+        '<div class="inc-tags">'+tag+'</div>'+
+        '<div class="inc-meta" style="margin:8px 0 0">Added by '+esc(x.checkedBy||'a referee')+
+          (x.resolvedBy?' · decided by '+esc(x.resolvedBy):'')+'</div>'+
+        acts+'</div>';
+    }).join('')+
+    '<p class="hint" style="margin-top:12px">A write-in is not cleared until it is approved here.</p>'+
+    '</div>';
+  }).catch(function(){
+    el.innerHTML='<div class="empty"><b>Offline</b>Cannot reach the server.</div>';
+  });
+}
+
+function resolveRoster(rowNum,how,btn){
+  if(btn.disabled) return;
+  btn.disabled=true; btn.textContent='…';
+  post({action:'resolveRoster',pin:S.pin,rowNum:rowNum,approval:how,
+        resolvedBy:(S.staff&&S.staff.name)||'staff'})
+    .then(function(r){
+      if(r&&r.status==='ok') loadRosterIssues();
+      else { btn.disabled=false; alert((r&&r.message)||'Could not update'); }
+    })
+    .catch(function(){ btn.disabled=false; alert('No signal.'); });
+}
+
+function badge(id,n){
+  var el=document.getElementById(id);
+  if(!el) return;
+  el.textContent=n;
+  el.style.display=n>0?'inline-block':'none';
+}
+
+function keepScroll(fn){
+  var y=window.scrollY;
+  fn();
+  window.scrollTo(0,y);
+}
+
+// A game is spent once it has kicked off, been scored and confirmed, and has
+// nothing flagged outstanding. Those drop out of the way so the top of the
+// board is always the games that still need someone.
+function isSpent(g){
+  if(g.canceled) return true;
+  if(g.flagged) return false;
+  if(g.scoreStatus!=='Final') return false;
+  return mins(g.time)+110 < nowMins();
+}
+
+function renderStaff(){
+  var el=document.getElementById('staffBody');
+  if(!S.board||!S.board.length){
+    el.innerHTML='<div class="empty"><b>No games</b>Nothing scheduled for this day.</div>'; return; }
+  var caps=(S.staff&&S.staff.caps)||{};
+
+  var live=S.board.filter(function(g){ return !isSpent(g); });
+  var spent=S.board.filter(isSpent);
+
+  var byVenue={};
+  live.forEach(function(g){ (byVenue[g.venue]=byVenue[g.venue]||[]).push(g); });
+
+  var html=Object.keys(byVenue).sort().map(function(v){
+    var gs=byVenue[v].slice().sort(function(a,b){return mins(a.time)-mins(b.time);});
+    return '<div class="sec"><div class="sec-h"><h3>'+esc(v)+'</h3>'+
+      '<div class="rule"></div><span class="n">'+gs.length+'</span></div>'+
+      gs.map(function(g){ return staffRow(g,caps); }).join('')+'</div>';
+  }).join('');
+
+  if(!live.length) html='<div class="empty"><b>All caught up</b>Every game today is scored and confirmed.</div>';
+
+  if(spent.length){
+    spent.sort(function(a,b){ return mins(b.time)-mins(a.time); });
+    html+='<div class="spent-h" onclick="toggleSpent()">'+
+      '<h3>Done</h3><div class="rule"></div>'+
+      '<span class="cv" id="spentCv">'+spent.length+' ▾</span></div>'+
+      '<div class="spent-body" id="spentBody">'+
+      spent.map(function(g){ return staffRow(g,caps,true); }).join('')+'</div>';
+  }
+  el.innerHTML=html;
+}
+
+function toggleSpent(){
+  var b=document.getElementById('spentBody');
+  var on=b.classList.toggle('on');
+  var cv=document.getElementById('spentCv');
+  cv.textContent=cv.textContent.replace(/[▾▴]/, on?'▴':'▾');
+}
+
+function staffRow(g,caps,spent){
+  var badge = g.scoreStatus==='Final' ? '<span class="gm-badge fin">Final</span>'
+            : g.scoreStatus==='Reported' ? '<span class="gm-badge out">Needs confirm</span>'
+            : '';
+  var score = g.scoreStatus ? '<span class="gm-score">'+g.homeScore+' – '+g.awayScore+'</span>' : '';
+  var crew = (g.crew||[]).map(function(c){
+    return '<span class="cw'+(c.checkedIn?' in':'')+'">'+esc(c.pos)+' '+esc(c.name)+'</span>';
+  }).join('') || '<span class="cw">no crew assigned</span>';
+
+  var acts='';
+  if(caps.confirmScore && !spent){
+    if(g.scoreStatus==='Reported'){
+      // One tap. Fifty games a day means no modal for the common case.
+      acts='<button class="btn go" onclick="confirmNow(\''+g.gameId+'\',this)">Confirm '+
+             g.homeScore+' – '+g.awayScore+'</button>'+
+           '<button class="btn ghost" onclick="openScore(\''+g.gameId+'\',\'staff\')">Edit</button>';
+    } else if(!g.scoreStatus){
+      acts='<button class="btn ice" onclick="openScore(\''+g.gameId+'\',\'staff\')">Enter score</button>';
+    } else {
+      acts='<button class="btn ghost" onclick="openScore(\''+g.gameId+'\',\'staff\')">Edit score</button>';
+    }
+  }
+
+  return '<div class="gm'+(spent?' spent':'')+'">'+
+    '<div class="gm-top"><div class="gm-when"><b>'+esc(g.time)+'</b>'+
+      '<i>#'+esc(g.gameNumber)+(g.field?' · '+esc(g.field):'')+'</i></div>'+badge+'</div>'+
+    '<div class="gm-match">'+esc(g.home)+' vs '+esc(g.away)+score+'</div>'+
+    '<div class="gm-meta">'+esc(g.division)+(g.flagged?' · ⚑ staff attention':'')+'</div>'+
+    '<div class="crew">'+crew+'</div>'+
+    (acts?'<div class="gm-acts">'+acts+'</div>':'')+
+  '</div>';
+}
+
+// Single click confirm, optimistic, no modal.
+function confirmNow(gameId,btn){
+  if(btn.disabled) return;
+  btn.disabled=true; btn.textContent='Confirming…';
+  var g=null; (S.board||[]).forEach(function(x){ if(x.gameId===gameId) g=x; });
+  if(!g){ btn.disabled=false; return; }
+  post({action:'confirmScore',pin:S.pin,gameId:gameId,
+        confirmedBy:(S.staff&&S.staff.name)||'staff',
+        homeScore:g.homeScore,awayScore:g.awayScore,date:S.date})
+    .then(function(r){
+      if(r&&r.status==='ok'){ g.scoreStatus='Final'; keepScroll(renderStaff); }
+      else { btn.disabled=false; btn.textContent='Confirm'; alert((r&&r.message)||'Could not confirm'); }
+    })
+    .catch(function(){ btn.disabled=false; btn.textContent='Confirm'; alert('No signal.'); });
+}
+
+/* ── emergency ── */
+function openRap(){ document.getElementById('rapBg').classList.add('on'); }
+function openSos(){ document.getElementById('sosBg').classList.add('on'); }
+function sendSos(reason){
+  var g=null, now=nowMins();
+  S.myGames.forEach(function(x){ if(!g && mins(x.time)+110>=now) g=x; });
+  var body={action:'emergency',reason:reason,
+            refName:S.refName||(S.staff&&S.staff.name)||'Unidentified',
+            venue:g?g.venue:'', field:g?g.field:'',
+            gameId:g?g.gameId:'', gameNumber:g?g.gameNumber:''};
+  closeModal('sosBg');
+  if(S.demo){ alert('Sample mode. Nothing was sent.\n\nLive, this alerts '+((EV.alertWho)||'site staff')+' instantly.'); return; }
+  post(body).then(function(r){
+    alert(r&&r.status==='ok'
+      ? 'Alert sent.\n\nStay where you are. Someone is on the way.'
+      : 'Could not send. Call Joe directly.');
+  }).catch(function(){ alert('No signal. Call Joe directly.'); });
+}
+
+/* ── weather ── */
+function loadWx(){
+  api('weather',{venue:(EV.weatherPlace||''),date:S.date}).then(function(r){
+    if(!r||r.status!=='ok'||!r.data) return;
+    var c=r.data.current||{}, dl=r.data.daily||{};
+    var bits=[]; if(c.temperature_2m!=null)bits.push(Math.round(c.temperature_2m)+'°');
+    if(c.wind_speed_10m!=null)bits.push(Math.round(c.wind_speed_10m)+' mph');
+    if(dl.precipChance!=null)bits.push(dl.precipChance+'% rain');
+    var code=c.weather_code, storm=code!=null&&code>=95;
+    document.getElementById('wxIco').textContent =
+      storm?'⛈️':(code>=61&&code<=82)?'🌧️':(code>=1&&code<=3)?'⛅':'☀️';
+    document.getElementById('wxDesc').textContent=(EV.weatherPlace?EV.weatherPlace+' \u00b7 ':'')+bits.join(' \u00b7 ');
+    document.getElementById('wxStrip').classList.toggle('alert',storm);
+    document.getElementById('wxState').textContent=storm?'Storms in the area':'Fields open';
+  }).catch(function(){});
+}
+
+try{ var saved=localStorage.getItem('jar-ref-'+EVENT); if(saved) S.refName=saved; }catch(e){}
+loadWx();
+setInterval(loadWx,10*60*1000);
+// Refresh pauses while staff are actually reading, and restores scroll after.
+var _lastTouch=0;
+['scroll','touchstart','pointerdown'].forEach(function(ev){
+  window.addEventListener(ev,function(){ _lastTouch=Date.now(); },{passive:true});
+});
+setInterval(function(){
+  if(!document.getElementById('s-staff').classList.contains('on')) return;
+  if(document.querySelector('.mbg.on')) return;              // a modal is open
+  if(Date.now()-_lastTouch < 12000) return;                  // still reading
+  loadBoard();
+},45000);
+
+
+/* boot */
+try { paintBrand(); } catch(e) { }
+</script>
+</body>
+</html>
