@@ -23,6 +23,13 @@
 (function () {
   'use strict';
 
+  // The event to assume when the path segment matches nothing -- opened
+  // locally, from a preview, or from an unexpected URL. Set this to the
+  // event this repo serves. Getting it wrong shows another tournament's
+  // data under this tournament's branding, which is how Steamboat games
+  // appeared on the DIC scoreboard.
+  var DEFAULT_EVENT = 'dic';
+
   var BACKEND = 'https://script.google.com/macros/s/AKfycbxQXvVq-gtGfUvgXF3NJXkFU_4aVlqFclU0bF0B0dQWbpjb42tstU7UnbKLf5DFP3PY/exec';
 
   // Relative on purpose. Whatever repo this file sits in serves the
@@ -33,8 +40,8 @@
   var HOUSE = {
     jareferee: { name: 'JAReferee', url: 'https://jareferee.com',
                  mark: ASSETS + 'jareferee-mark-light.png' },
-    csa:       { name: 'Colorado Soccer Association', url: 'https://www.coloradosoccer.org',
-                 mark: ASSETS + 'csa-mark-light.png' }
+    csrp:      { name: 'Colorado Soccer Referee Program', url: 'https://www.coloradoreferee.com',
+                 mark: ASSETS + 'colorado-referee-program.png' }
   };
 
   var EVENTS = {
@@ -62,6 +69,9 @@
                  'STARS'],
       // Referee HQ / non-playing sites. Never offered as a card or score venue.
       hqVenues: ['STARS'],
+      divisionOrder: ['U9/10 Boys','U9/10 Girls','U11/12 Boys','U11/12 Girls',
+                      'U13/14 Boys','U13/14 Girls','U17/19 Boys Gold',
+                      'U17/19 Boys Silver','U17/19 Girls'],
       // Applied in order to shorten a venue for a narrow phone header.
       trim:     [' - Steamboat', 'Steamboat Springs '],
       // Landing-page venue cards. `map` is a Google Maps destination
@@ -114,6 +124,20 @@
                   '2026-08-09': ['Sun', 'Aug 9'] },
       venues:   ['Broomfield County Commons Park', 'Aurora Sports Park'],
       hqVenues: [],
+      // 23 divisions, generated from the 203-game Assignr export.
+      divisionOrder: ['U11 Boys Gold','U11 Boys Silver',
+                      'U11/U12 Girls Gold','U11/U12 Girls Silver',
+                      'U12 Boys Gold',
+                      'U13 Boys Gold','U13 Boys Silver',
+                      'U13 Girls Gold','U13 Girls Silver',
+                      'U14 Boys Silver',
+                      'U14 Girls Gold','U14 Girls Silver','U14 Girls Bronze',
+                      'U14/U15 Boys Gold',
+                      'U15 Girls Gold','U15 Girls Silver',
+                      'U16 Girls Gold','U16 Girls Silver',
+                      'U16/U17 Boys Gold',
+                      'U17 Girls Gold',
+                      'HS Boys Gold','HS Girls Gold','HS Girls Silver'],
       // Assignr carries the two referee HQs as sub-venues, not venues, so
       // they are filtered at the field level instead.
       hqFields: ['Yellow Pod - Referee HQ', 'West - Ref HQ'],
@@ -132,14 +156,14 @@
           map: 'Aurora+Sports+Park,+Aurora,+CO', games: 74 }
       ],
       logos:    [{ name: 'Colorado Rush', url: 'https://www.coloradorush.com/denver-international-cup',
-                   src: ASSETS + 'colorado-rush.webp', alt: 'Colorado Rush' },
+                   src: ASSETS + 'colorado-rush.png', alt: 'Colorado Rush' },
                  { name: 'Denver International Cup',
-                   src: ASSETS + 'denver-international-cup.webp',
+                   src: ASSETS + 'denver-international-cup.png',
                    alt: '2026 Denver International Cup · August 7-9, 2026' }],
-      alertWho: 'site staff and Deanna',
-      // Straight from the Assignr game note. Replace the placeholders
-      // below once Deanna confirms the DIC site coordinators by name.
+      alertWho: 'your site coordinator and Deanna',
       refInfo:  [
+        { h: 'Your site coordinator',
+          p: '<b>Broomfield</b> \u2014 Deanna Duncan-Allen, Bowen Taylor, George Lewis and Sonja Dawson Urano. <b>Aurora</b> \u2014 Tim Auth. They are at the Referee HQ tent. If it is urgent, use the red Help button.' },
         { h: 'Game cards',
           p: 'Game cards are at each field in a box, with score entry instructions. Post-game, leave the filled card in the box. Post your score here as well, and complete your game report in Assignr so you get paid.' },
         { h: 'Something wrong',
@@ -164,7 +188,7 @@
     for (var i = 0; i < keys.length; i++) {
       if (EVENTS[keys[i]].path === seg) return EVENTS[keys[i]];
     }
-    return EVENTS.steamboat;
+    return EVENTS[DEFAULT_EVENT] || EVENTS.steamboat;
   }
 
   var EVENT = resolve();
