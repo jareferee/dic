@@ -74,14 +74,14 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .door.primary:hover{filter:brightness(1.06)}
 
 
-/* SMST shield watermark, drawn in SVG so there is no file to break */
+/* Event watermark. Painted at runtime from JAR.EVENT -- the crest when
+   the event supplies one, otherwise a shield drawn in the accent colour. */
 body::after{
   content:'';position:fixed;z-index:0;pointer-events:none;
   top:50%;left:50%;transform:translate(-50%,-50%);
   width:min(88vw,540px);height:min(88vw,540px);
-  background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20244%22%3E%20%3Cpath%20d%3D%22M14%2032%20L47%209%20L70%2036%20L100%207%20L130%2036%20L153%209%20L186%2032%20L186%20142%20C186%20197%20148%20229%20100%20238%20C52%20229%2014%20197%2014%20142%20Z%22%20fill%3D%22none%22%20stroke%3D%22%237FB8DE%22%20stroke-width%3D%225%22%2F%3E%20%3Cpath%20d%3D%22M27%2045%20L52%2028%20L71%2050%20L100%2026%20L129%2050%20L148%2028%20L173%2045%20L173%20140%20C173%20186%20142%20213%20100%20221%20C58%20213%2027%20186%2027%20140%20Z%22%20fill%3D%22none%22%20stroke%3D%22%237FB8DE%22%20stroke-width%3D%222%22%20opacity%3D%22.6%22%2F%3E%20%3Cpath%20d%3D%22M36%20141%20L74%2084%20L97%20114%20L125%2072%20L164%20141%20Z%22%20fill%3D%22%237FB8DE%22%20opacity%3D%22.85%22%2F%3E%20%3Ccircle%20cx%3D%22100%22%20cy%3D%22176%22%20r%3D%2227%22%20fill%3D%22none%22%20stroke%3D%22%237FB8DE%22%20stroke-width%3D%224%22%2F%3E%20%3Cpath%20d%3D%22M100%20158%20L112%20167%20L107%20181%20L93%20181%20L88%20167%20Z%22%20fill%3D%22%237FB8DE%22%20opacity%3D%22.7%22%2F%3E%20%3C%2Fsvg%3E");
   background-repeat:no-repeat;background-position:center;background-size:contain;
-  opacity:.045;
+  opacity:.05;
 }
 @media (max-width:520px){ body::after{ opacity:.055 } }
 
@@ -703,8 +703,39 @@ function paintBrand(){
   var rap=document.getElementById('hRap');
   if(rap) rap.style.display = EV.rapUrl ? '' : 'none';
 
+  paintWatermark();
+  hideBrokenMarks();
   paintVenues();
   paintLogos(H);
+}
+
+function paintWatermark(){
+  var css;
+  if (EV.watermark) {
+    css = 'url("' + EV.watermark + '")';
+  } else {
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 244">'+
+      '<path d="M14 32 L47 9 L70 36 L100 7 L130 36 L153 9 L186 32 L186 142 '+
+        'C186 197 148 229 100 238 C52 229 14 197 14 142 Z" fill="none" '+
+        'stroke="'+(EV.accent||'#7FB8DE')+'" stroke-width="5"/>'+
+      '<path d="M36 132 L74 75 L97 105 L125 63 L164 132 Z" fill="'+(EV.accent||'#7FB8DE')+'" opacity=".85"/>'+
+      '<text x="100" y="192" text-anchor="middle" font-family="Impact,sans-serif" '+
+        'font-size="46" font-weight="900" fill="'+(EV.accent||'#7FB8DE')+'">'+String(EV.shield||'').slice(0,4)+'</text>'+
+      '</svg>';
+    css='url("data:image/svg+xml,'+encodeURIComponent(svg)+'")';
+  }
+  var st=document.createElement('style');
+  st.textContent='body::after{background-image:'+css+'}';
+  document.head.appendChild(st);
+}
+
+// A missing brand file should leave a clean gap, not a broken-image icon.
+function hideBrokenMarks(){
+  var imgs=document.querySelectorAll('.jaref img');
+  Array.prototype.forEach.call(imgs,function(im){
+    im.onerror=function(){ this.style.display='none'; };
+    if(im.complete && im.naturalWidth===0) im.style.display='none';
+  });
 }
 
 function setTxt(id, v){ var el=document.getElementById(id); if(el) el.textContent=v; }

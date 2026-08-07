@@ -304,53 +304,26 @@ function pickBracket(b,btn){
   render();
 }
 
-// Paint the watermark from the event shield.
+// Watermark: the event crest when config supplies one, otherwise a
+// generic shield drawn in the accent colour.
 function paintWatermark(){
-  var col=(EV.accent||'#7FB8DE').replace('#','%23');
-  var txt=String(EV.shield||'').slice(0,4);
-  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 244">'+
-    '<path d="M14 32 L47 9 L70 36 L100 7 L130 36 L153 9 L186 32 L186 142 '+
-      'C186 197 148 229 100 238 C52 229 14 197 14 142 Z" fill="none" '+
-      'stroke="'+(EV.accent||'#7FB8DE')+'" stroke-width="5"/>'+
-    '<path d="M27 45 L52 28 L71 50 L100 26 L129 50 L148 28 L173 45 L173 140 '+
-      'C173 186 142 213 100 221 C58 213 27 186 27 140 Z" fill="none" '+
-      'stroke="'+(EV.accent||'#7FB8DE')+'" stroke-width="2" opacity=".6"/>'+
-    '<path d="M36 132 L74 75 L97 105 L125 63 L164 132 Z" fill="'+(EV.accent||'#7FB8DE')+'" opacity=".85"/>'+
-    '<text x="100" y="192" text-anchor="middle" font-family="Impact,sans-serif" '+
-      'font-size="46" font-weight="900" letter-spacing="2" fill="'+(EV.accent||'#7FB8DE')+'">'+txt+'</text>'+
-    '</svg>';
-  var css='url("data:image/svg+xml,'+encodeURIComponent(svg)+'")';
+  var css;
+  if (EV.watermark) {
+    css = 'url("' + EV.watermark + '")';
+  } else {
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 244">'+
+      '<path d="M14 32 L47 9 L70 36 L100 7 L130 36 L153 9 L186 32 L186 142 '+
+        'C186 197 148 229 100 238 C52 229 14 197 14 142 Z" fill="none" '+
+        'stroke="'+(EV.accent||'#7FB8DE')+'" stroke-width="5"/>'+
+      '<path d="M36 132 L74 75 L97 105 L125 63 L164 132 Z" fill="'+(EV.accent||'#7FB8DE')+'" opacity=".85"/>'+
+      '<text x="100" y="192" text-anchor="middle" font-family="Impact,sans-serif" '+
+        'font-size="46" font-weight="900" fill="'+(EV.accent||'#7FB8DE')+'">'+String(EV.shield||'').slice(0,4)+'</text>'+
+      '</svg>';
+    css='url("data:image/svg+xml,'+encodeURIComponent(svg)+'")';
+  }
   var st=document.createElement('style');
   st.textContent='body::after{background-image:'+css+'}';
   document.head.appendChild(st);
-}
-
-function renderDays(){
-  var box = document.getElementById('days'); if (!box) return;
-  var d = EV.dates || [];
-  box.innerHTML = d.map(function(x){
-    var p = (EV.daylbl||{})[x] || [x,''];
-    return '<button class="day" role="tab" aria-selected="'+(x===S.date)+'" '+
-           'onclick="pickDay(\''+x+'\',this)"><b>'+p[0]+'</b><i>'+(p[1]||'')+'</i></button>';
-  }).join('');
-}
-
-var ORDER = (EV.divisionOrder && EV.divisionOrder.length) ? EV.divisionOrder : [];
-
-/* No sample data. This board is public: an invented score shown as real
-   is worse than an empty board. If the endpoint cannot be reached the
-   board says "offline" and shows nothing. */
-
-
-function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
-  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-
-function mins(t){
-  var m=String(t||'').match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
-  if(!m) return 9999;
-  var h=+m[1], mi=+m[2], ap=m[3].toUpperCase();
-  if(ap==='PM'&&h!==12)h+=12; if(ap==='AM'&&h===12)h=0;
-  return h*60+mi;
 }
 
 function pickDay(d,btn){

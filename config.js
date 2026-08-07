@@ -124,6 +124,9 @@
                   '2026-08-09': ['Sun', 'Aug 9'] },
       venues:   ['Broomfield County Commons Park', 'Aurora Sports Park'],
       hqVenues: [],
+      // Transparent crest, used as the page watermark. Omit for an event
+      // and the pages draw a generic shield in the accent colour instead.
+      watermark: ASSETS + 'dic-crest.png',
       // 23 divisions, generated from the 203-game Assignr export.
       divisionOrder: ['U11 Boys Gold','U11 Boys Silver',
                       'U11/U12 Girls Gold','U11/U12 Girls Silver',
