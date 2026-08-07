@@ -515,6 +515,29 @@ body::after{
     <div id="hVenues"></div>
   </div>
 
+  <a class="lead" id="hRap" href="rap/" style="display:none">
+    <b>Sideline conduct and referee respect</b>
+    <i>Most officials here are teenagers, several working their first match. If you were asked to leave a game, this page gets you back on the sideline.</i>
+    <span class="arrow">Read it &#9656;</span>
+  </a>
+
+  <div class="quiet">
+    <button class="qrow" onclick="goRefPick()">
+      <b>Referee check in</b><i>crew only</i><span class="chev">&#8250;</span>
+    </button>
+    <button class="qrow" onclick="toggleStaff()">
+      <b>Tournament staff</b><i>PIN</i><span class="chev">&#8250;</span>
+    </button>
+    <div class="pinbox" id="pinBox" style="display:none;border-top:0;padding-top:4px;margin-top:2px">
+      <div class="pinrow">
+        <input type="tel" id="pin" maxlength="4" inputmode="numeric" placeholder="PIN"
+               onkeydown="if(event.key==='Enter')doAuth()">
+        <button onclick="doAuth()">Enter</button>
+      </div>
+      <div class="err" id="pinErr"></div>
+    </div>
+  </div>
+
   <div class="blk" id="hLogosBlk" style="display:none">
     <div class="blk-h"><h3>Hosted by</h3><div class="rule"></div></div>
     <div id="hLogos"></div>
@@ -675,6 +698,9 @@ function paintBrand(){
   if (EV.accent) {
     try { document.documentElement.style.setProperty('--accent', EV.accent); } catch(e){}
   }
+
+  var rap=document.getElementById('hRap');
+  if(rap) rap.style.display = EV.rapUrl ? '' : 'none';
 
   paintVenues();
   paintLogos(H);
