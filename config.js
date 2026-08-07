@@ -117,7 +117,11 @@
       accent:   '#1B6CB5',
       hub:      'jareferee.com/dic',
       rapUrl:   'jareferee.com/dic/rap',
-      rulesUrl: 'rules.html',
+      // rulesUrl: 'rules.html',
+      //   PULLED 2026-08-07. The published rules changed and rules.html is
+      //   stale. Both hub entry points and the tournament-info panel are
+      //   gated on rulesUrl, so commenting this out hides all of them.
+      //   Put the line back once the page matches the new rules.
       weatherPlace: 'Broomfield',
       dates:    ['2026-08-07', '2026-08-08', '2026-08-09'],
       daylbl:   { '2026-08-07': ['Fri', 'Aug 7'],
