@@ -688,8 +688,8 @@ body::after{
     <h2 id="emgWhat">Emergency</h2>
     <div class="who" id="emgWho"></div>
     <div class="det" id="emgDetail"></div>
-    <button class="go"  onclick="emgAck('enroute')">I am on my way</button>
-    <button class="sec" onclick="emgAck('handled')">Already handled</button>
+    <button class="go"  onclick="emgAck('enroute',this)">I am on my way</button>
+    <button class="sec" onclick="emgAck('handled',this)">Already handled</button>
     <button class="sec" onclick="emgSilence()">Silence the alarm</button>
   </div>
 </div>
@@ -1238,11 +1238,18 @@ function ackEmg(rowNum,how,btn){
   post({action:'ackEmergency',pin:S.pin,rowNum:rowNum,ackStatus:how,
         ackBy:(S.staff&&S.staff.name)||'staff'})
     .then(function(r){
-      if(r&&r.status==='ok'){ btn.classList.add('on'); loadBoard(); }
-      else { btn.disabled=false; btn.textContent=how==='enroute'?'I am on my way':'Handled';
-             alert((r&&r.message)||'Could not update'); }
-    })
-    .catch(function(){ btn.disabled=false; alert('No signal.'); });
+      if(r&&r.status==='ok'){
+        // Guarded so a UI error after a successful write is never reported
+        // back as a failed send.
+        try{ if(btn.classList) btn.classList.add('on'); loadBoard(); }catch(e){}
+        return;
+      }
+      btn.disabled=false; btn.textContent=how==='enroute'?'I am on my way':'Handled';
+      alert((r&&r.message)||'Could not update');
+    },function(){
+      btn.disabled=false; btn.textContent=how==='enroute'?'I am on my way':'Handled';
+      alert('Could not reach the server. The alert is still open.');
+    });
 }
 
 function refreshBadges(){
@@ -1671,12 +1678,32 @@ function showEmgTakeover(a){
   el.classList.add('on');
 }
 
-function emgAck(how){
+function emgAck(how,btn){
   var el=document.getElementById('emgOver');
   var row=el?Number(el.getAttribute('data-row')||0):0;
   sirenStop();
-  if(el) el.classList.remove('on');
-  if(row) ackEmg(row,how,{disabled:false,textContent:''});
+  if(!row){ if(el) el.classList.remove('on'); return; }
+
+  var label=btn?btn.textContent:'';
+  if(btn){ btn.disabled=true; btn.textContent=how==='enroute'?'Sending\u2026':'Clearing\u2026'; }
+
+  post({action:'ackEmergency',pin:S.pin,rowNum:row,ackStatus:how,
+        ackBy:(S.staff&&S.staff.name)||'staff'})
+    .then(function(r){
+      if(r&&r.status==='ok'){
+        if(el) el.classList.remove('on');
+        try{ loadBoard(); }catch(e){}
+      } else {
+        // The write failed. Keep the alert on screen -- closing it would
+        // tell a coordinator the message was received when it was not.
+        if(btn){ btn.disabled=false; btn.textContent=label; }
+        alert((r&&r.message)||'Could not update. The alert is still open.');
+      }
+    })
+    .catch(function(){
+      if(btn){ btn.disabled=false; btn.textContent=label; }
+      alert('Could not reach the server. The alert is still open \u2014 tell your site coordinator directly.');
+    });
 }
 
 function emgSilence(){ sirenStop(); }
