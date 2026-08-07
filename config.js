@@ -117,6 +117,7 @@
       accent:   '#1B6CB5',
       hub:      'jareferee.com/dic',
       rapUrl:   'jareferee.com/dic/rap',
+      rulesUrl: 'rules.html',
       weatherPlace: 'Broomfield',
       dates:    ['2026-08-07', '2026-08-08', '2026-08-09'],
       daylbl:   { '2026-08-07': ['Fri', 'Aug 7'],

@@ -510,6 +510,12 @@ body::after{
     <span class="arrow">Tap to open &#9656;</span>
   </a>
 
+  <a class="lead" id="hRules" href="rules.html" style="display:none">
+    <b>Tournament rules</b>
+    <i>Half lengths, substitutions, send-off suspensions, weather and equipment</i>
+    <span class="arrow">Open &#9656;</span>
+  </a>
+
   <div class="blk">
     <div class="blk-h"><h3>Where to go</h3><div class="rule"></div></div>
     <div id="hVenues"></div>
@@ -702,6 +708,9 @@ function paintBrand(){
 
   var rap=document.getElementById('hRap');
   if(rap) rap.style.display = EV.rapUrl ? '' : 'none';
+  var rul=document.getElementById('hRules');
+  if(rul){ rul.style.display = EV.rulesUrl ? '' : 'none';
+           if(EV.rulesUrl) rul.setAttribute('href', EV.rulesUrl); }
 
   paintWatermark();
   hideBrokenMarks();
@@ -918,7 +927,12 @@ function renderRef(){
       '<div class="rule"></div><span class="n">'+rest.length+'</span></div>'+
       rest.map(gameRow).join('')+'</div>';
   }
-  var info=EV.refInfo||[];
+  var info=(EV.refInfo||[]).slice();
+  if(EV.rulesUrl){
+    info = info.concat([{ h:'Tournament rules',
+      p:'Half lengths, substitution restarts, send-off suspensions, equipment and the '+
+        'weather policy. <a href="'+EV.rulesUrl+'" style="color:var(--ice)">Open the rules</a>.' }]);
+  }
   if(info.length){
     html+='<div class="sec"><div class="sec-h"><h3>Tournament info</h3><div class="rule"></div></div>'+
       info.map(function(x){
