@@ -885,7 +885,7 @@ function filterRefs(){
   if(q.length>=1) list=S.refs.filter(function(r){return r.name.toLowerCase().indexOf(q)>=0;});
   else list=S.refs.slice(0,8);
   var el=document.getElementById('refList');
-  if(!list.length){ el.innerHTML='<div class="empty"><b>No match</b>Check the spelling, or ask Joe at HQ.</div>'; return; }
+  if(!list.length){ el.innerHTML='<div class="empty"><b>No match</b>Check the spelling, or ask at the Referee HQ tent.</div>'; return; }
   el.innerHTML=list.map(function(r){
     return '<button class="refrow" onclick="pickRef('+JSON.stringify(r.name).replace(/"/g,'&quot;')+')">'+
       '<b>'+esc(r.name)+'</b>'+(r.games?'<i>'+r.games+' game'+(r.games===1?'':'s')+'</i>':'')+'</button>';
@@ -1572,8 +1572,8 @@ function sendSos(reason){
   post(body).then(function(r){
     alert(r&&r.status==='ok'
       ? 'Alert sent.\n\nStay where you are. Someone is on the way.'
-      : 'Could not send. Call Joe directly.');
-  }).catch(function(){ alert('No signal. Call Joe directly.'); });
+      : 'Could not send. Find your site coordinator at the Referee HQ tent, or call them directly.');
+  }).catch(function(){ alert('No signal. Go to the Referee HQ tent and find your site coordinator.'); });
 }
 
 /* ── weather ── */
