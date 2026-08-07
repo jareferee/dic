@@ -461,6 +461,26 @@ body::after{
   font-size:12px;letter-spacing:.15em;text-transform:uppercase;text-align:center;padding:6px;display:none}
 .demo.on{display:block}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* emergency takeover */
+#emgOver{position:fixed;inset:0;z-index:900;display:none;
+  background:rgba(120,26,14,.97);backdrop-filter:blur(3px);
+  align-items:center;justify-content:center;padding:24px;text-align:center}
+#emgOver.on{display:flex}
+#emgOver .inner{max-width:460px;width:100%}
+#emgOver .kick{font-family:var(--mono);font-size:11px;letter-spacing:.28em;
+  text-transform:uppercase;color:#FFD9CF;margin-bottom:10px}
+#emgOver h2{font-family:var(--disp);font-weight:900;font-size:40px;line-height:1.02;
+  letter-spacing:.02em;text-transform:uppercase;margin:0 0 12px;color:#fff}
+#emgOver .who{font-size:17px;color:#FFE7E0;margin-bottom:8px}
+#emgOver .det{font-size:14px;color:#FFD9CF;margin-bottom:22px;white-space:pre-wrap}
+#emgOver button{appearance:none;border:0;cursor:pointer;width:100%;
+  border-radius:11px;padding:16px;margin-bottom:9px;
+  font-family:var(--disp);font-weight:900;font-size:19px;letter-spacing:.08em;
+  text-transform:uppercase}
+#emgOver .go{background:#fff;color:#7A1A0E}
+#emgOver .sec{background:rgba(255,255,255,.14);color:#fff;
+  border:1.5px solid rgba(255,255,255,.4);font-size:15px;padding:12px}
 </style>
 </head>
 <body>
@@ -658,6 +678,19 @@ body::after{
       </div>
     </div>
     <div class="m-f"><button class="btn ghost" onclick="closeModal('sosBg')">Never mind</button></div>
+  </div>
+</div>
+
+
+<div id="emgOver">
+  <div class="inner">
+    <div class="kick">Emergency &middot; someone needs help now</div>
+    <h2 id="emgWhat">Emergency</h2>
+    <div class="who" id="emgWho"></div>
+    <div class="det" id="emgDetail"></div>
+    <button class="go"  onclick="emgAck('enroute')">I am on my way</button>
+    <button class="sec" onclick="emgAck('handled')">Already handled</button>
+    <button class="sec" onclick="emgSilence()">Silence the alarm</button>
   </div>
 </div>
 
@@ -916,8 +949,8 @@ function renderRef(){
           (next.scoreStatus?'Edit score':'Post score')+'</button>'+
       '</div>'+
       '<div class="next-acts" style="margin-top:8px">'+
-        '<a class="btn ice" style="text-align:center;text-decoration:none" href="'+rosterHref(next)+'">Game card</a>'+
-        '<a class="btn ghost" style="text-align:center;text-decoration:none" href="'+incHref(next)+'">Report</a>'+
+        '<a class="btn ice" style="text-align:center;text-decoration:none" href="'+rosterHref(next)+'">Game card &amp; roster</a>'+
+        '<a class="btn ghost" style="text-align:center;text-decoration:none" href="'+incHref(next)+'">Incident report</a>'+
       '</div></div>';
   }
 
@@ -981,8 +1014,8 @@ function gameRow(g){
       '<button class="btn ghost" onclick="openScore(\''+g.gameId+'\')">'+(done?'Edit score':'Score')+'</button>'+
     '</div>'+
     '<div class="gm-acts" style="margin-top:7px">'+
-      '<a class="btn ghost" style="text-align:center;text-decoration:none" href="'+rosterHref(g)+'">Game card</a>'+
-      '<a class="btn ghost" style="text-align:center;text-decoration:none" href="'+incHref(g)+'">Report</a>'+
+      '<a class="btn ghost" style="text-align:center;text-decoration:none" href="'+rosterHref(g)+'">Game card &amp; roster</a>'+
+      '<a class="btn ghost" style="text-align:center;text-decoration:none" href="'+incHref(g)+'">Incident report</a>'+
     '</div>'+
   '</div>';
 }
@@ -1059,7 +1092,7 @@ function showNudge(){
   document.getElementById('scPad').style.display='none';
   document.getElementById('scFoot').innerHTML=
     '<a class="btn ghost" style="text-align:center;text-decoration:none" href="'+
-      incHref(S.scGame||{gameId:''})+'">File a report</a>'+
+      incHref(S.scGame||{gameId:''})+'">File an incident report</a>'+
     '<button class="btn go" onclick="closeModal(\'scoreBg\')">I will do it in Assignr</button>';
 }
 
@@ -1097,6 +1130,7 @@ function saveScore(){
 
 /* ── staff ── */
 function doAuth(){
+  unlockAudio();
   var pin=(document.getElementById('pin').value||'').trim();
   var err=document.getElementById('pinErr'); err.textContent='';
   if(pin.length<4){ err.textContent='Four digits.'; return; }
@@ -1573,6 +1607,96 @@ setInterval(function(){
   if(Date.now()-_lastTouch < 12000) return;                  // still reading
   loadBoard();
 },45000);
+
+
+/* ══ EMERGENCY SIREN ═══════════════════════════════════════
+   An emergency email is silent, and a site coordinator is not watching
+   a screen. This polls faster than the board, and when a NEW alert
+   appears it sounds, vibrates and takes over the page until someone
+   acknowledges it.
+
+   iOS will not play audio that was not started by a tap, so the audio
+   context is unlocked on the staff PIN entry -- the one tap every site
+   coordinator makes. Without that unlock this degrades to vibrate and
+   the visual takeover, which still works. */
+var _ac=null, _sirenTimer=null, _emgSeen={}, _emgPrimed=false;
+
+function unlockAudio(){
+  try{
+    var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    if(!_ac) _ac=new AC();
+    if(_ac.state==='suspended') _ac.resume();
+    // A silent blip completes the unlock on iOS.
+    var o=_ac.createOscillator(), g=_ac.createGain();
+    g.gain.value=0.0001; o.connect(g); g.connect(_ac.destination);
+    o.start(); o.stop(_ac.currentTime+0.02);
+  }catch(e){}
+}
+
+function beep(freq,when,dur){
+  if(!_ac) return;
+  try{
+    var o=_ac.createOscillator(), g=_ac.createGain();
+    o.type='square'; o.frequency.value=freq;
+    g.gain.setValueAtTime(0.0001,_ac.currentTime+when);
+    g.gain.exponentialRampToValueAtTime(0.35,_ac.currentTime+when+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001,_ac.currentTime+when+dur);
+    o.connect(g); g.connect(_ac.destination);
+    o.start(_ac.currentTime+when); o.stop(_ac.currentTime+when+dur+0.02);
+  }catch(e){}
+}
+
+function sirenStart(){
+  if(_sirenTimer) return;
+  var pulse=function(){
+    beep(880,0,.18); beep(1180,.22,.18); beep(880,.44,.18);
+    try{ if(navigator.vibrate) navigator.vibrate([300,120,300,120,300]); }catch(e){}
+  };
+  pulse();
+  _sirenTimer=setInterval(pulse,2200);   // keeps going until acknowledged
+}
+
+function sirenStop(){
+  if(_sirenTimer){ clearInterval(_sirenTimer); _sirenTimer=null; }
+  try{ if(navigator.vibrate) navigator.vibrate(0); }catch(e){}
+}
+
+function showEmgTakeover(a){
+  var el=document.getElementById('emgOver'); if(!el) return;
+  document.getElementById('emgWhat').textContent=a.reason||'Emergency';
+  document.getElementById('emgWho').textContent=
+    (a.refName||'A referee')+' \u00b7 '+(a.venue||'location unknown')+(a.field?' \u00b7 '+a.field:'');
+  document.getElementById('emgDetail').textContent=a.details||'';
+  el.setAttribute('data-row',a.rowNum);
+  el.classList.add('on');
+}
+
+function emgAck(how){
+  var el=document.getElementById('emgOver');
+  var row=el?Number(el.getAttribute('data-row')||0):0;
+  sirenStop();
+  if(el) el.classList.remove('on');
+  if(row) ackEmg(row,how,{disabled:false,textContent:''});
+}
+
+function emgSilence(){ sirenStop(); }
+
+function emgPoll(){
+  if(!S.pin) return;                       // staff only
+  api('emergencies',{openOnly:'1'}).then(function(r){
+    if(!r||r.status!=='ok'||!r.data) return;
+    var fresh=null;
+    r.data.forEach(function(a){
+      var k=String(a.rowNum);
+      if(!_emgSeen[k]){ _emgSeen[k]=1; if(_emgPrimed && a.status!=='handled') fresh=fresh||a; }
+    });
+    // The first poll after signing in only records what is already open,
+    // so a coordinator arriving mid-shift is not sirened at by old alerts.
+    _emgPrimed=true;
+    if(fresh){ sirenStart(); showEmgTakeover(fresh); }
+  }).catch(function(){});
+}
+setInterval(emgPoll,15000);
 
 
 /* boot */
