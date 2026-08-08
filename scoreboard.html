@@ -80,6 +80,11 @@ body::after{
 .day:focus-visible{outline:2px solid var(--ice-pale);outline-offset:-3px}
 
 /* weather strip, the signature */
+.back{margin-left:10px;flex-shrink:0;text-decoration:none;
+  border:1.5px solid rgba(127,184,222,.3);color:var(--ice);border-radius:8px;
+  padding:6px 11px;font-family:var(--disp);font-weight:800;font-size:12px;
+  letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.back:hover{border-color:var(--ice)}
 .wx{margin:0;border-bottom:1px solid rgba(127,184,222,.14);
   background:rgba(23,51,75,.5);cursor:pointer;transition:background .2s}
 .wx:hover{background:rgba(23,51,75,.72)}
@@ -179,6 +184,7 @@ body::after{
         <div class="sub" id="brSub"></div>
       </div>
       <div class="live"><span class="dot"></span><span id="upd">live</span></div>
+      <a class="back" href="index.html">Hub</a>
     </div>
   </div>
   <div class="days" role="tablist" id="days"></div>
