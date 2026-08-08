@@ -171,6 +171,21 @@ body::after{
   .g-t{font-size:13.5px}
   .g-t b{font-size:17px}
 }
+
+/* Every page declares viewport-fit=cover, so the sticky header sits under
+   the notch and under Safari's own controls. On a Mac window the traffic
+   lights land on top of it. Pad by the safe area and give the back control
+   a full 44px tap target -- the Apple minimum, which none of these met. */
+.top, .ctx{ padding-top:calc(11px + env(safe-area-inset-top,0px)) !important; }
+.top-in, .ctx-in{
+  padding-left:calc(15px + env(safe-area-inset-left,0px));
+  padding-right:calc(15px + env(safe-area-inset-right,0px));
+}
+.x, .back{
+  min-height:44px; min-width:64px;
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:0 14px;
+}
 </style>
 </head>
 <body>
