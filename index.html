@@ -631,6 +631,7 @@ body::after{
     <button aria-pressed="false" onclick="setView('roster',this)">Roster<span class="badge" id="rosBadge" style="display:none">0</span></button>
   </div>
   <div class="stats" id="staffStats"></div>
+  <div class="vtabs" id="staffSites" style="display:none"></div>
   <div id="staffBody"></div>
 </div>
 
@@ -719,7 +720,7 @@ var DAYLBL = EV.daylbl || {};
 
 var S = { date:pickDate(), refs:[], refName:'', myGames:[], staff:null,
           pin:'', board:null, scGame:null, scMode:'ref', demo:false,
-          view:'games', incidents:[] };
+          view:'games', site:'all', incidents:[], stats:null };
 
 function pickDate(){
   var n=new Date(), m=n.getMonth()+1, d=n.getDate();
@@ -1280,7 +1281,25 @@ function refreshBadges(){
 }
 
 function renderStats(s){
+  if(s) S.stats=s; else s=S.stats;
   if(!s) return;
+
+  if(S.site!=='all' && S.board){
+    var b=S.board.filter(function(g){ return String(g.venue||'')===S.site; });
+    var seen={}, tot=0, inn=0, rep=0, noCrew=0;
+    b.forEach(function(g){
+      if(g.scoreStatus==='Reported') rep++;
+      var cw=g.crew||[];
+      if(!cw.length) noCrew++;
+      cw.forEach(function(c){
+        var k=String(c.name||'').toLowerCase();
+        if(!k||seen[k]) return;
+        seen[k]=1; tot++; if(c.checkedIn) inn++;
+      });
+    });
+    s={ games:b.length, refsCheckedIn:inn, refsTotal:tot, reported:rep, noCrew:noCrew };
+  }
+
   document.getElementById('staffStats').innerHTML=
     '<div class="stat"><b>'+s.games+'</b><i>games</i></div>'+
     '<div class="stat"><b>'+s.refsCheckedIn+'/'+s.refsTotal+'</b><i>checked in</i></div>'+
@@ -1491,14 +1510,59 @@ function isSpent(g){
   return mins(g.time)+110 < nowMins();
 }
 
+// Venue filter for the staff board. Deanna opens Saturday to 100 games
+// across two sites and has to scroll past 43 Aurora fixtures to reach
+// Broomfield. Built from what is actually on the board, so a one-venue
+// event never shows the row.
+function staffVenues(){
+  var seen={}, out=[];
+  (S.board||[]).forEach(function(g){
+    var v=String(g.venue||'').trim();
+    if(v && !seen[v]){ seen[v]=1; out.push(v); }
+  });
+  return out.sort();
+}
+
+function renderStaffSites(){
+  var box=document.getElementById('staffSites'); if(!box) return;
+  var vs=staffVenues();
+  if(vs.length<2){ box.style.display='none'; S.site='all'; return; }
+  box.style.display='';
+  var b=function(val,label,on){
+    return '<button aria-pressed="'+on+'" onclick="pickStaffSite('+
+      JSON.stringify(val).replace(/"/g,'&quot;')+',this)">'+esc(label)+'</button>';
+  };
+  box.innerHTML=b('all','All sites',S.site==='all')+
+    vs.map(function(v){
+      var short=(window.JAR&&JAR.short)?JAR.short(v):v;
+      return b(v,short,S.site===v);
+    }).join('');
+}
+
+function pickStaffSite(v,btn){
+  S.site=v;
+  var p=btn.parentNode.querySelectorAll('button');
+  for(var i=0;i<p.length;i++) p[i].setAttribute('aria-pressed', p[i]===btn?'true':'false');
+  renderStats();
+  renderStaff();
+}
+
 function renderStaff(){
   var el=document.getElementById('staffBody');
+  renderStaffSites();
   if(!S.board||!S.board.length){
     el.innerHTML='<div class="empty"><b>No games</b>Nothing scheduled for this day.</div>'; return; }
   var caps=(S.staff&&S.staff.caps)||{};
 
-  var live=S.board.filter(function(g){ return !isSpent(g); });
-  var spent=S.board.filter(isSpent);
+  var board=(S.site==='all') ? S.board
+    : S.board.filter(function(g){ return String(g.venue||'')===S.site; });
+
+  var live=board.filter(function(g){ return !isSpent(g); });
+  var spent=board.filter(isSpent);
+
+  if(!board.length){
+    el.innerHTML='<div class="empty"><b>Nothing at '+esc((window.JAR&&JAR.short)?JAR.short(S.site):S.site)+
+      '</b>No games at this site today.</div>'; return; }
 
   var byVenue={};
   live.forEach(function(g){ (byVenue[g.venue]=byVenue[g.venue]||[]).push(g); });
