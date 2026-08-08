@@ -669,7 +669,7 @@ textarea.fin{resize:vertical;line-height:1.5}
   <div class="days" id="staffDays"></div>
   <a class="handout" href="cards.html" style="display:block;text-align:center;text-decoration:none;margin-top:14px">Print game cards</a>
   <button class="handout" id="eodBtn" onclick="openEod()"
-          style="display:block;width:100%;text-align:center;margin-top:9px">End of day report</button>
+          style="display:none;width:100%;text-align:center;margin-top:9px">End of day report</button>
   <div class="vtabs" id="vtabs">
     <button aria-pressed="true"  onclick="setView('games',this)">Games</button>
     <button aria-pressed="false" onclick="setView('incidents',this)">Incidents<span class="badge" id="incBadge" style="display:none">0</span></button>
@@ -683,31 +683,31 @@ textarea.fin{resize:vertical;line-height:1.5}
 
 </div>
 
-<div class="modalbg" id="eodBg" onclick="if(event.target===this)closeModal('eodBg')">
+<!-- End of day report -->
+<div class="mbg" id="eodBg" onclick="if(event.target===this)closeModal('eodBg')">
   <div class="modal">
-    <h3>End of day report</h3>
-    <p class="mod-sub" id="eodWhen"></p>
+    <div class="m-h"><b>End of day report</b><i id="eodWhen">—</i></div>
+    <div class="m-b">
+      <label class="fl">Site</label>
+      <select id="eodVenue" class="fin"></select>
 
-    <label class="fl">Site</label>
-    <select id="eodVenue" class="fin"></select>
+      <div class="two">
+        <div><label class="fl">Time in</label>
+          <input class="fin" id="eodIn" type="text" placeholder="7:00 AM"></div>
+        <div><label class="fl">Time out</label>
+          <input class="fin" id="eodOut" type="text" placeholder="6:30 PM"></div>
+      </div>
+      <div class="hint" id="eodHours">Hours are worked out from the two times.</div>
 
-    <div class="two">
-      <div><label class="fl">Time in</label>
-        <input class="fin" id="eodIn" type="text" inputmode="text" placeholder="7:00 AM"></div>
-      <div><label class="fl">Time out</label>
-        <input class="fin" id="eodOut" type="text" inputmode="text" placeholder="6:30 PM"></div>
+      <label class="fl">Notes for Deanna and Jeff</label>
+      <textarea class="fin" id="eodNotes" rows="5"
+        placeholder="How did the day go? Anything that needs attention, anyone who stood out, anything to change tomorrow."></textarea>
+      <div class="err" id="eodErr"></div>
     </div>
-    <div class="hint" id="eodHours">Hours are worked out from the two times.</div>
-
-    <label class="fl">Notes for Deanna and Jeff</label>
-    <textarea class="fin" id="eodNotes" rows="5"
-      placeholder="How did the day go? Anything that needs attention, anyone who stood out, anything to change tomorrow."></textarea>
-
-    <div class="mod-a">
+    <div class="m-f">
       <button class="btn ghost" onclick="closeModal('eodBg')">Cancel</button>
-      <button class="btn go" id="eodSave" onclick="saveEod(this)">File the report</button>
+      <button class="btn ice" id="eodSave" onclick="saveEod(this)">File the report</button>
     </div>
-    <div class="err" id="eodErr"></div>
   </div>
 </div>
 
@@ -1469,6 +1469,7 @@ function refreshBadges(){
 }
 
 function renderStats(s){
+  try{ showEodFor(S.staff&&S.staff.role); }catch(e){}
   if(s) S.stats=s; else s=S.stats;
   if(!s) return;
 
@@ -1752,6 +1753,14 @@ function staffVenues(){
     if(v && !seen[v]){ seen[v]=1; out.push(v); }
   });
   return out.sort();
+}
+
+// Only site coordinators file hours. Admin and directors can still open
+// it from the sheet, but the button is not theirs.
+function showEodFor(role){
+  var b=document.getElementById('eodBtn'); if(!b) return;
+  role=String(role||'').toLowerCase();
+  b.style.display=(role==='sc'||role==='coordinator')?'block':'none';
 }
 
 function renderStaffSites(){
