@@ -496,6 +496,16 @@ body::after{
   display:inline-flex; align-items:center; justify-content:center;
   padding:0 14px;
 }
+
+/* Suspension warning on a staff game row. Loud on purpose: a suspended
+   player taking the field is the failure this exists to prevent. */
+.sitwarn{background:rgba(196,71,47,.16);border:1.5px solid rgba(196,71,47,.55);
+  border-radius:10px;padding:10px 12px;margin:0 0 10px}
+.sitwarn > b{display:block;font-family:var(--disp);font-weight:900;font-size:12.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:#F0A897;margin-bottom:5px}
+.sitwarn span{display:block;font-size:13.5px;color:var(--snow);margin-bottom:3px}
+.sitwarn i{display:block;font-style:normal;font-size:12px;color:#F0A897;margin-top:4px}
+.gm.hassit{border-color:rgba(196,71,47,.45)}
 </style>
 </head>
 <body>
@@ -720,7 +730,7 @@ var DAYLBL = EV.daylbl || {};
 
 var S = { date:pickDate(), refs:[], refName:'', myGames:[], staff:null,
           pin:'', board:null, scGame:null, scMode:'ref', demo:false,
-          view:'games', site:'all', incidents:[], stats:null };
+          view:'games', site:'all', incidents:[], stats:null, sitOuts:[] };
 
 function pickDate(){
   var n=new Date(), m=n.getMonth()+1, d=n.getDate();
@@ -1273,7 +1283,11 @@ function refreshBadges(){
     if(r&&r.status==='ok') badge('incBadge',(r.data||[]).filter(function(i){return i.status==='open';}).length);
   }).catch(function(){});
   api('sitOutList',{pin:S.pin}).then(function(r){
-    if(r&&r.status==='ok') badge('sitBadge',(r.data||[]).filter(function(x){return !x.rapCompleted;}).length);
+    if(r&&r.status==='ok'){
+      S.sitOuts=(r.data||[]).filter(function(x){return !x.rapCompleted;});
+      badge('sitBadge',S.sitOuts.length);
+      try{ if(S.view==='games') renderStaff(); }catch(e){}
+    }
   }).catch(function(){});
   api('rosterIssues',{pin:S.pin,date:S.date}).then(function(r){
     if(r&&r.status==='ok') badge('rosBadge',(r.data||[]).filter(function(x){return x.approval==='pending';}).length);
@@ -1594,7 +1608,48 @@ function toggleSpent(){
   cv.textContent=cv.textContent.replace(/[▾▴]/, on?'▴':'▾');
 }
 
+// Which outstanding suspensions touch this game.
+//
+// Matched on TEAM, not player name, because there is no roster at DIC --
+// a team-level warning is the only thing available and it is better than
+// silence. Assignr prefixes the club onto the team name, so this compares
+// on containment after stripping punctuation rather than on equality.
+function _tkey_(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,''); }
+
+function sitOutsFor(g){
+  try{
+    if(!S.sitOuts||!S.sitOuts.length) return [];
+    var h=_tkey_(g.home), a=_tkey_(g.away);
+    if(!h&&!a) return [];
+    return S.sitOuts.filter(function(x){
+      var t=_tkey_(x.team); if(t.length<4) return false;
+      // Do not warn on the game the card came from.
+      if(x.gameNumber && String(x.gameNumber)===String(g.gameNumber)) return false;
+      return (h&&(h.indexOf(t)>=0||t.indexOf(h)>=0)) ||
+             (a&&(a.indexOf(t)>=0||t.indexOf(a)>=0));
+    });
+  }catch(e){ return []; }
+}
+
+function sitOutBanner(g){
+  var hits=sitOutsFor(g);
+  if(!hits.length) return '';
+  return '<div class="sitwarn">'+
+    '<b>Suspension &middot; check before kickoff</b>'+
+    hits.map(function(x){
+      return '<span>'+esc(x.name||'Unnamed')+
+        (x.role?' \u00b7 '+esc(x.role):'')+
+        (x.reason?' \u00b7 '+esc(x.reason):'')+
+        ' \u00b7 sent off '+esc(x.date||'')+
+        (x.gameNumber?' in #'+esc(x.gameNumber):'')+
+        ' \u00b7 <b>'+esc(x.team||'')+'</b></span>';
+    }).join('')+
+    '<i>This person must not play or coach. Confirm with the team before the match starts.</i>'+
+  '</div>';
+}
+
 function staffRow(g,caps,spent){
+  var sitwarn = spent ? '' : sitOutBanner(g);
   var badge = g.scoreStatus==='Final' ? '<span class="gm-badge fin">Final</span>'
             : g.scoreStatus==='Reported' ? '<span class="gm-badge out">Needs confirm</span>'
             : '';
@@ -1617,7 +1672,7 @@ function staffRow(g,caps,spent){
     }
   }
 
-  return '<div class="gm'+(spent?' spent':'')+'">'+
+  return '<div class="gm'+(spent?' spent':'')+(sitwarn?' hassit':'')+'">'+sitwarn+
     '<div class="gm-top"><div class="gm-when"><b>'+esc(g.time)+'</b>'+
       '<i>#'+esc(g.gameNumber)+(g.field?' · '+esc(g.field):'')+'</i></div>'+badge+'</div>'+
     '<div class="gm-match">'+esc(g.home)+' vs '+esc(g.away)+score+'</div>'+
