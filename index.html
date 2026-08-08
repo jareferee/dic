@@ -506,6 +506,40 @@ body::after{
 .sitwarn span{display:block;font-size:13.5px;color:var(--snow);margin-bottom:3px}
 .sitwarn i{display:block;font-style:normal;font-size:12px;color:#F0A897;margin-top:4px}
 .gm.hassit{border-color:rgba(196,71,47,.45)}
+
+/* End of day report + suspension cards */
+.fl{display:block;font-family:var(--disp);font-weight:800;font-size:11px;
+  letter-spacing:.17em;text-transform:uppercase;color:var(--steel);margin:12px 0 5px}
+.fin{width:100%;background:rgba(9,25,40,.7);border:1.5px solid rgba(127,184,222,.24);
+  border-radius:9px;color:var(--snow);font-family:var(--body);font-size:16px;
+  padding:11px 12px;outline:none}
+.fin:focus{border-color:var(--ice)}
+textarea.fin{resize:vertical;line-height:1.5}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:12px;color:var(--steel);margin-top:6px}
+.mod-sub{font-size:13px;color:var(--ice-pale);margin:2px 0 4px}
+
+.sx{background:rgba(23,51,75,.45);border:1px solid rgba(127,184,222,.16);
+  border-radius:11px;padding:13px 15px;margin-bottom:10px}
+.sx.done{opacity:.62}
+.sx-h{display:flex;align-items:flex-start;gap:10px}
+.sx-h b{flex:1;font-family:var(--disp);font-weight:900;font-size:17px;
+  letter-spacing:.03em;text-transform:uppercase}
+.sx-role{font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--steel)}
+.sx-badge{flex-shrink:0;font-family:var(--mono);font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;background:rgba(196,71,47,.22);color:#F0A897;
+  border-radius:99px;padding:4px 10px}
+.sx-badge.ok{background:rgba(79,168,122,.2);color:#8FD8B4}
+.sx-m{font-size:13px;color:var(--steel);margin-top:3px}
+.sx-len{margin-top:8px;font-size:14px;color:var(--ice-pale)}
+.sx-len b{color:var(--snow)}
+.sx-len i{display:block;font-style:normal;font-family:var(--mono);font-size:10px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--steel);margin-top:2px}
+.sx-log{margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(9,25,40,.5);
+  font-family:var(--mono);font-size:11.5px;color:var(--ice-pale);line-height:1.6}
+.sx-a{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
+.sx-a .btn{flex:1;min-width:150px}
 </style>
 </head>
 <body>
@@ -634,6 +668,8 @@ body::after{
   <div id="staffAlerts"></div>
   <div class="days" id="staffDays"></div>
   <a class="handout" href="cards.html" style="display:block;text-align:center;text-decoration:none;margin-top:14px">Print game cards</a>
+  <button class="handout" id="eodBtn" onclick="openEod()"
+          style="display:block;width:100%;text-align:center;margin-top:9px">End of day report</button>
   <div class="vtabs" id="vtabs">
     <button aria-pressed="true"  onclick="setView('games',this)">Games</button>
     <button aria-pressed="false" onclick="setView('incidents',this)">Incidents<span class="badge" id="incBadge" style="display:none">0</span></button>
@@ -645,6 +681,34 @@ body::after{
   <div id="staffBody"></div>
 </div>
 
+</div>
+
+<div class="modalbg" id="eodBg" onclick="if(event.target===this)closeModal('eodBg')">
+  <div class="modal">
+    <h3>End of day report</h3>
+    <p class="mod-sub" id="eodWhen"></p>
+
+    <label class="fl">Site</label>
+    <select id="eodVenue" class="fin"></select>
+
+    <div class="two">
+      <div><label class="fl">Time in</label>
+        <input class="fin" id="eodIn" type="text" inputmode="text" placeholder="7:00 AM"></div>
+      <div><label class="fl">Time out</label>
+        <input class="fin" id="eodOut" type="text" inputmode="text" placeholder="6:30 PM"></div>
+    </div>
+    <div class="hint" id="eodHours">Hours are worked out from the two times.</div>
+
+    <label class="fl">Notes for Deanna and Jeff</label>
+    <textarea class="fin" id="eodNotes" rows="5"
+      placeholder="How did the day go? Anything that needs attention, anyone who stood out, anything to change tomorrow."></textarea>
+
+    <div class="mod-a">
+      <button class="btn ghost" onclick="closeModal('eodBg')">Cancel</button>
+      <button class="btn go" id="eodSave" onclick="saveEod(this)">File the report</button>
+    </div>
+    <div class="err" id="eodErr"></div>
+  </div>
 </div>
 
 <button class="sos" onclick="openSos()">🚨 Help</button>
@@ -864,6 +928,116 @@ function toggleStaff(){
   if(open) setTimeout(function(){ document.getElementById('pin').focus(); },60);
 }
 function closeModal(id){ document.getElementById(id).classList.remove('on'); }
+
+/* ══ END OF DAY REPORT ════════════════════════════════════
+   Hours in and out, so they reconcile against CHECKINS, plus a note to
+   admin. One report per coordinator per day -- filing again corrects the
+   first rather than adding a second, because these are timesheets. */
+function eodHoursPreview(){
+  function mins(t){
+    var m=String(t||'').trim().match(/^(\d{1,2}):(\d{2})\s*([AaPp][Mm])?$/);
+    if(!m) return null;
+    var h=Number(m[1]), mm=Number(m[2]), ap=(m[3]||'').toUpperCase();
+    if(ap==='PM'&&h<12) h+=12;
+    if(ap==='AM'&&h===12) h=0;
+    return h*60+mm;
+  }
+  var a=mins(document.getElementById('eodIn').value),
+      b=mins(document.getElementById('eodOut').value);
+  var el=document.getElementById('eodHours');
+  if(a==null||b==null){ el.textContent='Hours are worked out from the two times.'; return; }
+  if(b<a) b+=1440;
+  el.textContent=(Math.round((b-a)/6)/10)+' hours';
+}
+
+function openEod(){
+  var sel=document.getElementById('eodVenue');
+  var vs=staffVenues();
+  if(!vs.length && window.JAR && JAR.playVenues) vs=JAR.playVenues();
+  sel.innerHTML=vs.map(function(v){
+    var short=(window.JAR&&JAR.short)?JAR.short(v):v;
+    return '<option value="'+esc(v)+'"'+(S.site===v?' selected':'')+'>'+esc(short)+'</option>';
+  }).join('') || '<option value="">All sites</option>';
+
+  document.getElementById('eodWhen').textContent=
+    (S.staff&&S.staff.name?S.staff.name+' \u00b7 ':'')+
+    ((DAYLBL[S.date]||[]).join(' ')||S.date);
+  document.getElementById('eodErr').textContent='';
+  document.getElementById('eodIn').oninput=eodHoursPreview;
+  document.getElementById('eodOut').oninput=eodHoursPreview;
+
+  // Prefill from an existing report so a correction is an edit.
+  api('scReportStatus',{pin:S.pin,date:S.date,scName:(S.staff&&S.staff.name)||''})
+    .then(function(r){
+      if(r&&r.status==='ok'&&r.filed&&r.report){
+        if(r.report.venue) sel.value=r.report.venue;
+        document.getElementById('eodIn').value=r.report.timeIn||'';
+        document.getElementById('eodOut').value=r.report.timeOut||'';
+        document.getElementById('eodNotes').value=r.report.notes||'';
+        document.getElementById('eodSave').textContent='Update the report';
+        eodHoursPreview();
+      }
+    }).catch(function(){});
+
+  document.getElementById('eodBg').classList.add('on');
+}
+
+function saveEod(btn){
+  var err=document.getElementById('eodErr'); err.textContent='';
+  var tin=document.getElementById('eodIn').value.trim();
+  var tout=document.getElementById('eodOut').value.trim();
+  if(!tin||!tout){ err.textContent='Both times are needed.'; return; }
+  var label=btn.textContent;
+  btn.disabled=true; btn.textContent='Filing\u2026';
+  post({action:'scReport',pin:S.pin,date:S.date,
+        scName:(S.staff&&S.staff.name)||'',
+        role:(S.staff&&S.staff.role)||'sc',
+        venue:document.getElementById('eodVenue').value,
+        timeIn:tin,timeOut:tout,
+        notes:document.getElementById('eodNotes').value})
+    .then(function(r){
+      if(r&&r.status==='ok'){
+        closeModal('eodBg');
+        try{ localStorage.setItem('jar-eod-'+EVENT+'-'+S.date,'1'); }catch(e){}
+        alert(r.message);
+      } else {
+        btn.disabled=false; btn.textContent=label;
+        err.textContent=(r&&r.message)||'Could not file.';
+      }
+    },function(){ btn.disabled=false; btn.textContent=label;
+        err.textContent='Could not reach the server.'; });
+}
+
+// Nudge once, late in the day, only for a coordinator who has not filed.
+function maybePromptEod(){
+  try{
+    if(!S.pin||!S.staff) return;
+    var role=S.staff.role;
+    if(role!=='sc'&&role!=='coordinator') return;
+    if(S.date!==todayStr()) return;
+    if(new Date().getHours()<17) return;
+    if(localStorage.getItem('jar-eod-'+EVENT+'-'+S.date)) return;
+    if(S._eodAsked) return;
+    S._eodAsked=true;
+    api('scReportStatus',{pin:S.pin,date:S.date,scName:S.staff.name||''})
+      .then(function(r){
+        if(r&&r.status==='ok'&&!r.filed){
+          var el=document.getElementById('staffMsg');
+          if(!el) return;
+          el.innerHTML='<div class="msgcard" style="border-color:rgba(224,162,43,.5)">'+
+            '<div class="k">Before you go</div>'+
+            '<p>File your end of day report so your hours are recorded.</p>'+
+            '<button class="btn go" style="margin-top:8px" onclick="openEod()">End of day report</button>'+
+            '</div>'+el.innerHTML;
+        }
+      }).catch(function(){});
+  }catch(e){}
+}
+
+function todayStr(){
+  var n=new Date(), m=n.getMonth()+1, d=n.getDate();
+  return n.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(d<10?'0':'')+d;
+}
 function toggleWx(){
   var b=document.getElementById('wxBody'), on=b.classList.toggle('on');
   document.getElementById('wxMore').textContent = on?'policy ▴':'policy ▾';
@@ -1341,6 +1515,86 @@ function setView(v,btn){
   else if(v==='incidents') loadIncidents();
   else if(v==='roster')    loadRosterIssues();
   else                     loadSitOut();
+  if(v==='games') maybePromptEod();
+}
+
+/* ══ SUSPENSIONS ══════════════════════════════════════════
+   Replaces the RAP acknowledgement. Mirrors the CSA tournament
+   suspension form: who, what code, how many games, and a signed record
+   of each one served.
+
+   The length is NOT decided by a lookup table. A default is offered
+   from the code, and admin -- acting as the discipline committee --
+   can change it on any incident. The published rules changed once
+   already; nothing here treats a number as settled. */
+function loadSitOut(){
+  var el=document.getElementById('staffBody');
+  el.innerHTML='<div class="empty">Loading suspensions…</div>';
+  api('suspensions',{pin:S.pin,date:S.date}).then(function(r){
+    if(!r||r.status!=='ok'){ el.innerHTML='<div class="empty"><b>Could not load</b>'+esc((r&&r.message)||'')+'</div>'; return; }
+    S.susp=r.data||[];
+    renderSusp();
+  }).catch(function(){ el.innerHTML='<div class="empty"><b>No signal</b>Try again.</div>'; });
+}
+
+function renderSusp(){
+  var el=document.getElementById('staffBody');
+  var list=S.susp||[];
+  if(!list.length){
+    el.innerHTML='<div class="empty"><b>No suspensions</b>Nothing outstanding at this event.</div>'; return; }
+  var isAdmin=(S.staff&&S.staff.role==='admin');
+  el.innerHTML=list.map(function(x,i){
+    var done=x.complete;
+    var head=esc(x.name||'Unnamed')+(x.role?' <span class="sx-role">'+esc(x.role)+'</span>':'');
+    var prog=x.required>=99 ? 'Remainder of the event'
+           : x.served+' of '+x.required+' served';
+    return '<div class="sx'+(done?' done':'')+'">'+
+      '<div class="sx-h"><b>'+head+'</b>'+
+        '<span class="sx-badge'+(done?' ok':'')+'">'+(done?'Served':prog)+'</span></div>'+
+      '<div class="sx-m">'+esc(x.team||'')+(x.division?' \u00b7 '+esc(x.division):'')+'</div>'+
+      '<div class="sx-m">'+esc(x.code||'')+(x.codeMeaning?' \u00b7 '+esc(x.codeMeaning):'')+
+        ' \u00b7 '+esc(x.date||'')+(x.gameNumber?' \u00b7 #'+esc(x.gameNumber):'')+
+        (x.field?' \u00b7 '+esc(x.field):'')+'</div>'+
+      '<div class="sx-len">Suspension <b>'+esc(x.requiredLabel)+'</b>'+
+        (x.isDefault?'<i>default, not yet reviewed</i>':'<i>set by '+esc(x.setBy||'admin')+'</i>')+'</div>'+
+      (x.log?'<div class="sx-log">'+esc(x.log).replace(/\n/g,'<br>')+'</div>':'')+
+      '<div class="sx-a">'+
+        (done?'':'<button class="btn go" onclick="serveSitOut('+i+',this)">Record a sit out served</button>')+
+        (isAdmin?'<button class="btn ghost" onclick="editSusp('+i+')">Change length</button>':'')+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function serveSitOut(i,btn){
+  var x=(S.susp||[])[i]; if(!x) return;
+  var gn=prompt('Game number the sit out was served at, for '+x.name+':','');
+  if(gn===null) return;
+  var ref=prompt('Referee who confirmed it:', (S.staff&&S.staff.name)||'');
+  if(ref===null) return;
+  btn.disabled=true; btn.textContent='Recording…';
+  post({action:'serveSitOut',pin:S.pin,incidentId:x.incidentId,
+        gameNumber:gn,refName:ref,date:S.date})
+    .then(function(r){
+      if(r&&r.status==='ok'){ alert(r.message); loadSitOut(); }
+      else { btn.disabled=false; btn.textContent='Record a sit out served';
+             alert((r&&r.message)||'Could not record'); }
+    },function(){ btn.disabled=false; btn.textContent='Record a sit out served';
+             alert('Could not reach the server.'); });
+}
+
+function editSusp(i){
+  var x=(S.susp||[])[i]; if(!x) return;
+  var v=prompt('How many games must '+x.name+' sit out?\n\n'+
+    'Enter a number. 99 means the remainder of the event. 0 clears the sit out entirely.\n'+
+    'Current: '+x.requiredLabel, String(x.required));
+  if(v===null) return;
+  post({action:'setSuspension',pin:S.pin,incidentId:x.incidentId,
+        games:Number(v),setBy:(S.staff&&S.staff.name)||'admin'})
+    .then(function(r){
+      alert((r&&r.message)||'Could not update');
+      if(r&&r.status==='ok') loadSitOut();
+    },function(){ alert('Could not reach the server.'); });
 }
 
 function loadStaffMessage(){
@@ -1403,43 +1657,6 @@ function closeInc(rowNum){
     .then(function(r){ if(r&&r.status==='ok') loadIncidents();
                        else alert((r&&r.message)||'Could not update'); })
     .catch(function(){ alert('No signal.'); });
-}
-
-function loadSitOut(){
-  var el=document.getElementById('staffBody');
-  el.innerHTML='<div class="empty">Loading…</div>';
-  api('sitOutList',{pin:S.pin}).then(function(r){
-    if(!r||r.status!=='ok'){
-      el.innerHTML='<div class="empty"><b>No access</b>'+((r&&r.message)||'Could not load.')+'</div>';
-      return;
-    }
-    var list=r.data||[];
-    badge('sitBadge',list.filter(function(x){return !x.rapCompleted;}).length);
-    if(!list.length){
-      el.innerHTML='<button class="handout" onclick="openRap()">Show the sideline conduct QR</button>'+
-        '<div class="empty"><b>Nobody sitting out</b>No dismissals on record.</div>';
-      return;
-    }
-    el.innerHTML='<div class="sec">'+
-      '<button class="handout" onclick="openRap()">Show the sideline conduct QR</button>'+
-      '<div class="sec-h"><h3>Not to be on the fields</h3><div class="rule"></div>'+
-      '<span class="n">'+list.length+'</span></div>'+
-      list.map(function(x){
-        return '<div class="inc'+(x.rapCompleted?' closed':' urgent')+'">'+
-          '<div class="inc-top"><span class="inc-who">'+esc(x.name)+'</span></div>'+
-          '<div class="inc-meta">'+[x.team,x.role,x.date,x.gameNumber?'#'+x.gameNumber:'',x.venue]
-            .filter(Boolean).map(esc).join(' · ')+'</div>'+
-          '<div class="inc-tags">'+
-            (x.reason?'<span class="tag red">'+esc(x.reason)+'</span>':'')+
-            '<span class="tag '+(x.rapCompleted?'green':'amber')+'">'+
-              (x.rapCompleted?'RAP completed · cleared':'RAP not completed')+'</span>'+
-          '</div></div>';
-      }).join('')+
-      '<p class="hint" style="margin-top:12px">Staff only. None of this appears on the public scoreboard.</p>'+
-      '</div>';
-  }).catch(function(){
-    el.innerHTML='<div class="empty"><b>Offline</b>Cannot reach the server.</div>';
-  });
 }
 
 function loadRosterIssues(){
