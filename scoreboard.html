@@ -26,14 +26,14 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .wrap{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:0 14px}
 
 
-/* Event shield watermark. Drawn at runtime from JAR.EVENT so there is
-   no image file to break and no per-event asset to make. */
+/* SMST shield watermark, drawn in SVG so there is no file to break */
 body::after{
   content:'';position:fixed;z-index:0;pointer-events:none;
   top:50%;left:50%;transform:translate(-50%,-50%);
   width:min(88vw,540px);height:min(88vw,540px);
+  background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20244%22%3E%20%3Cpath%20d%3D%22M14%2032%20L47%209%20L70%2036%20L100%207%20L130%2036%20L153%209%20L186%2032%20L186%20142%20C186%20197%20148%20229%20100%20238%20C52%20229%2014%20197%2014%20142%20Z%22%20fill%3D%22none%22%20stroke%3D%22%237FB8DE%22%20stroke-width%3D%225%22%2F%3E%20%3Cpath%20d%3D%22M27%2045%20L52%2028%20L71%2050%20L100%2026%20L129%2050%20L148%2028%20L173%2045%20L173%20140%20C173%20186%20142%20213%20100%20221%20C58%20213%2027%20186%2027%20140%20Z%22%20fill%3D%22none%22%20stroke%3D%22%237FB8DE%22%20stroke-width%3D%222%22%20opacity%3D%22.6%22%2F%3E%20%3Cpath%20d%3D%22M36%20141%20L74%2084%20L97%20114%20L125%2072%20L164%20141%20Z%22%20fill%3D%22%237FB8DE%22%20opacity%3D%22.85%22%2F%3E%20%3Ccircle%20cx%3D%22100%22%20cy%3D%22176%22%20r%3D%2227%22%20fill%3D%22none%22%20stroke%3D%22%237FB8DE%22%20stroke-width%3D%224%22%2F%3E%20%3Cpath%20d%3D%22M100%20158%20L112%20167%20L107%20181%20L93%20181%20L88%20167%20Z%22%20fill%3D%22%237FB8DE%22%20opacity%3D%22.7%22%2F%3E%20%3C%2Fsvg%3E");
   background-repeat:no-repeat;background-position:center;background-size:contain;
-  opacity:.05;
+  opacity:.045;
 }
 @media (max-width:520px){ body::after{ opacity:.055 } }
 
@@ -80,11 +80,6 @@ body::after{
 .day:focus-visible{outline:2px solid var(--ice-pale);outline-offset:-3px}
 
 /* weather strip, the signature */
-.back{margin-left:10px;flex-shrink:0;text-decoration:none;
-  border:1.5px solid rgba(127,184,222,.3);color:var(--ice);border-radius:8px;
-  padding:6px 11px;font-family:var(--disp);font-weight:800;font-size:12px;
-  letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
-.back:hover{border-color:var(--ice)}
 .wx{margin:0;border-bottom:1px solid rgba(127,184,222,.14);
   background:rgba(23,51,75,.5);cursor:pointer;transition:background .2s}
 .wx:hover{background:rgba(23,51,75,.72)}
@@ -173,19 +168,17 @@ body::after{
 }
 
 /* Every page declares viewport-fit=cover, so the sticky header sits under
-   the notch and under Safari's own controls. On a Mac window the traffic
-   lights land on top of it. Pad by the safe area and give the back control
-   a full 44px tap target -- the Apple minimum, which none of these met. */
-.top, .ctx{ padding-top:calc(11px + env(safe-area-inset-top,0px)) !important; }
-.top-in, .ctx-in{
-  padding-left:calc(15px + env(safe-area-inset-left,0px));
-  padding-right:calc(15px + env(safe-area-inset-right,0px));
-}
-.x, .back{
-  min-height:44px; min-width:64px;
-  display:inline-flex; align-items:center; justify-content:center;
-  padding:0 14px;
-}
+   the notch and under Safari's own controls. Pad by the safe area and give
+   the back control a 44px tap target -- the Apple minimum. */
+.top{ padding-top:calc(11px + env(safe-area-inset-top,0px)) !important; }
+.top-in{ padding-left:calc(15px + env(safe-area-inset-left,0px));
+         padding-right:calc(15px + env(safe-area-inset-right,0px)); }
+.back{ margin-left:10px;flex-shrink:0;text-decoration:none;
+  border:1.5px solid rgba(127,184,222,.3);color:var(--ice);border-radius:8px;
+  min-height:44px;min-width:64px;display:inline-flex;align-items:center;justify-content:center;
+  padding:0 14px;font-family:var(--disp);font-weight:800;font-size:12px;
+  letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.back:hover{ border-color:var(--ice) }
 </style>
 </head>
 <body>
@@ -226,6 +219,7 @@ body::after{
 
   <div class="filters" id="filters"></div>
   <div class="filters" id="brackets" style="display:none"></div>
+  <div class="filters" id="sites" style="display:none"></div>
 
   <div class="counts" id="counts"></div>
   <div id="board"></div>
@@ -250,101 +244,141 @@ body::after{
 
 <script src="config.js"></script>
 <script>
-/* ── branding from config.js ─────────────────────────────
-   Nothing tournament-specific is hardcoded on this page. */
+/* ── everything tournament-specific comes from config.js ── */
 var EV    = (window.JAR && JAR.EVENT) || {};
 var EVENT = (window.JAR && JAR.id) || 'steamboat';
-function jarBrand(extra){
-  try{
-    document.title = (extra? extra+' \u00b7 ':'') + (EV.full||'Referee Hub');
-    var sh=document.getElementById('brShield'); if(sh) sh.textContent=EV.shield||'';
-    if(EV.accent) document.documentElement.style.setProperty('--accent',EV.accent);
-  }catch(e){}
-}
-
 var BACKEND = (window.JAR && JAR.BACKEND) || 'https://script.google.com/macros/s/AKfycbxQXvVq-gtGfUvgXF3NJXkFU_4aVlqFclU0bF0B0dQWbpjb42tstU7UnbKLf5DFP3PY/exec';
 var REFRESH = 30000;
 
-// Opening day defaults to today when today is one of the event days,
-// otherwise day one. Never a hardcoded date.
+// Opening day is today when today is one of the event days, otherwise the
+// most recent day that has passed. Never a hardcoded date.
 function openingDay(){
-  var d = (EV.dates && EV.dates.length) ? EV.dates : [];
-  if (!d.length) return '';
-  var n = new Date(), m = n.getMonth()+1, dd = n.getDate();
-  var t = n.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd;
-  if (d.indexOf(t) >= 0) return t;
-  var past = null;
-  for (var i=0;i<d.length;i++) if (d[i] <= t) past = d[i];
-  return past || d[0];
+  var d=EV.dates||[]; if(!d.length) return '';
+  var n=new Date(), m=n.getMonth()+1, dd=n.getDate();
+  var t=n.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd;
+  if(d.indexOf(t)>=0) return t;
+  var past=null; for(var i=0;i<d.length;i++) if(d[i]<=t) past=d[i];
+  return past||d[0];
 }
 
-var S = { date: openingDay(), band:'all', bracket:'all', byDate:{}, offline:false };
+var S = { date:openingDay(), band:'all', bracket:'all', site:'all', byDate:{}, offline:false };
 
-// Age groups and brackets are read off the event's division list rather
-// than hardcoded. Steamboat has four age bands; DIC has eleven and three
-// brackets. Hardcoding either one wrong shows a filter that matches
-// nothing, which reads as "no games" to a parent.
+function renderDays(){
+  var box=document.getElementById('days'); if(!box) return;
+  box.innerHTML=(EV.dates||[]).map(function(x){
+    var p=(EV.daylbl||{})[x]||[x,''];
+    return '<button class="day" role="tab" aria-selected="'+(x===S.date)+'" '+
+           'onclick="pickDay(\''+x+'\',this)"><b>'+p[0]+'</b><i>'+(p[1]||'')+'</i></button>';
+  }).join('');
+}
+
+// Age groups and brackets are read off the event's division list. Steamboat
+// has four age bands, DIC eleven. Hardcoding either shows a filter that
+// matches nothing, which reads as "no games" to a parent.
 function ageBands(){
-  var seen={}, out=[];
+  var seen={},out=[];
   (EV.divisionOrder||[]).forEach(function(d){
     var m=String(d).match(/^(HS|U\d{1,2}(?:\/U?\d{1,2})?)/);
-    if(m && !seen[m[1]]){ seen[m[1]]=1; out.push(m[1]); }
+    if(m&&!seen[m[1]]){ seen[m[1]]=1; out.push(m[1]); }
   });
   return out;
 }
 function brackets(){
-  var seen={}, out=[];
+  var seen={},out=[];
   (EV.divisionOrder||[]).forEach(function(d){
     var m=String(d).match(/\b(Gold|Silver|Bronze|Premier)\b/);
-    if(m && !seen[m[1]]){ seen[m[1]]=1; out.push(m[1]); }
+    if(m&&!seen[m[1]]){ seen[m[1]]=1; out.push(m[1]); }
   });
   return out;
 }
-function renderBands(){
-  var box=document.getElementById('filters'); if(!box) return;
-  var html='<button aria-pressed="true" onclick="pickBand(\'all\',this)">All</button>';
-  ageBands().forEach(function(b){
-    html+='<button aria-pressed="false" onclick="pickBand('+JSON.stringify(b).replace(/"/g,'&quot;')+',this)">'+b+'</button>';
-  });
-  box.innerHTML=html;
+function pill(active,fn,val,label){
+  return '<button aria-pressed="'+active+'" onclick="'+fn+'('+JSON.stringify(val).replace(/"/g,'&quot;')+',this)">'+label+'</button>';
+}
+function setPressed(btn){
+  var p=btn.parentNode.querySelectorAll('button');
+  for(var i=0;i<p.length;i++) p[i].setAttribute('aria-pressed', p[i]===btn?'true':'false');
+}
+function renderFilters(){
+  var f=document.getElementById('filters');
+  if(f){
+    f.innerHTML=pill(S.band==='all','pickBand','all','All')+
+      ageBands().map(function(b){ return pill(S.band===b,'pickBand',b,b); }).join('');
+  }
   var br=document.getElementById('brackets');
   if(br){
     var list=brackets();
-    if(list.length<2){ br.style.display='none'; return; }
-    br.style.display='';
-    br.innerHTML='<button aria-pressed="true" onclick="pickBracket(\'all\',this)">All</button>'+
-      list.map(function(b){
-        return '<button aria-pressed="false" onclick="pickBracket(\''+b+'\',this)">'+b+'</button>';
-      }).join('');
+    if(list.length<2){ br.style.display='none'; }
+    else{
+      br.style.display='';
+      br.innerHTML=pill(S.bracket==='all','pickBracket','all','All')+
+        list.map(function(b){ return pill(S.bracket===b,'pickBracket',b,b); }).join('');
+    }
+  }
+  // Site pills. Two venues and 43 games at one of them is a lot of
+  // scrolling for a coordinator who only cares about their own site.
+  var sv=document.getElementById('sites');
+  if(sv){
+    var vs=(window.JAR&&JAR.playVenues)?JAR.playVenues():(EV.venues||[]);
+    if(vs.length<2){ sv.style.display='none'; }
+    else{
+      sv.style.display='';
+      sv.innerHTML=pill(S.site==='all','pickSite','all','All sites')+
+        vs.map(function(v){
+          var short=(window.JAR&&JAR.short)?JAR.short(v):v;
+          return pill(S.site===v,'pickSite',v,short);
+        }).join('');
+    }
   }
 }
-function pickBracket(b,btn){
-  S.bracket=b;
-  var p=btn.parentNode.querySelectorAll('button');
-  for(var i=0;i<p.length;i++) p[i].setAttribute('aria-pressed', p[i]===btn ? 'true':'false');
-  render();
-}
+function pickBracket(b,btn){ S.bracket=b; setPressed(btn); render(); }
+function pickSite(v,btn){ S.site=v; setPressed(btn); render(); }
 
-// Watermark: the event crest when config supplies one, otherwise a
-// generic shield drawn in the accent colour.
 function paintWatermark(){
   var css;
-  if (EV.watermark) {
-    css = 'url("' + EV.watermark + '")';
-  } else {
+  if(EV.watermark){ css='url("'+EV.watermark+'")'; }
+  else{
+    var a=EV.accent||'#7FB8DE';
     var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 244">'+
       '<path d="M14 32 L47 9 L70 36 L100 7 L130 36 L153 9 L186 32 L186 142 '+
-        'C186 197 148 229 100 238 C52 229 14 197 14 142 Z" fill="none" '+
-        'stroke="'+(EV.accent||'#7FB8DE')+'" stroke-width="5"/>'+
-      '<path d="M36 132 L74 75 L97 105 L125 63 L164 132 Z" fill="'+(EV.accent||'#7FB8DE')+'" opacity=".85"/>'+
+        'C186 197 148 229 100 238 C52 229 14 197 14 142 Z" fill="none" stroke="'+a+'" stroke-width="5"/>'+
+      '<path d="M36 132 L74 75 L97 105 L125 63 L164 132 Z" fill="'+a+'" opacity=".85"/>'+
       '<text x="100" y="192" text-anchor="middle" font-family="Impact,sans-serif" '+
-        'font-size="46" font-weight="900" fill="'+(EV.accent||'#7FB8DE')+'">'+String(EV.shield||'').slice(0,4)+'</text>'+
-      '</svg>';
+        'font-size="46" font-weight="900" fill="'+a+'">'+String(EV.shield||'').slice(0,4)+'</text></svg>';
     css='url("data:image/svg+xml,'+encodeURIComponent(svg)+'")';
   }
   var st=document.createElement('style');
   st.textContent='body::after{background-image:'+css+'}';
   document.head.appendChild(st);
+}
+
+function paintBrand(){
+  try{
+    document.title='Scores \u00b7 '+(EV.full||'');
+    var sh=document.getElementById('brShield'); if(sh) sh.textContent=EV.shield||'';
+    var bn=document.getElementById('brName');   if(bn) bn.textContent=EV.name||'';
+    var bs=document.getElementById('brSub');    if(bs) bs.textContent=(EV.subtitle||'').toUpperCase();
+    var bh=document.getElementById('brHost');
+    if(bh&&EV.host) bh.innerHTML=(EV.subtitle||'')+' \u00b7 <a href="'+EV.host.url+'">'+EV.host.name+'</a>';
+    if(EV.accent) document.documentElement.style.setProperty('--accent',EV.accent);
+  }catch(e){}
+}
+
+var ORDER = (EV.divisionOrder && EV.divisionOrder.length) ? EV.divisionOrder : [];
+
+/* No sample data. This board is public: an invented score shown as real
+   is worse than an empty board. If the endpoint cannot be reached the
+   board says offline and shows nothing. */
+
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+function mins(t){
+  var m=String(t||'').match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if(!m) return 9999;
+  var h=+m[1], mi=+m[2], ap=m[3].toUpperCase();
+  if(ap==='PM'&&h!==12)h+=12; if(ap==='AM'&&h===12)h=0;
+  return h*60+mi;
 }
 
 function pickDay(d,btn){
@@ -397,13 +431,14 @@ function render(){
   var all = S.byDate[S.date] || [];
   var list = all.filter(function(g){
     var d=String(g.d||'');
-    if(S.band!=='all' && d.indexOf(S.band)!==0) return false;
-    if(S.bracket!=='all' && d.indexOf(S.bracket)<0) return false;
+    if(S.band!=='all'    && d.indexOf(S.band)!==0)      return false;
+    if(S.bracket!=='all' && d.indexOf(S.bracket)<0)     return false;
+    if(S.site!=='all'    && String(g.v||'')!==S.site)   return false;
     return true;
   });
 
-  // Counts describe what is on screen. Reading them off `all` while a
-  // filter was applied showed the whole day's total under a filtered board.
+  // Counts describe what is on screen. Reading them off `all` under an
+  // active filter showed the whole day's total over a filtered board.
   var fin=0,lv=0,up=0;
   list.forEach(function(g){
     if(g.st==='live') lv++; else if(g.hs!=null) fin++; else up++;
@@ -469,7 +504,7 @@ function loadWx(){
       var ico = storm?'⛈️':(code>=61&&code<=82)?'🌧️':(code>=1&&code<=3)?'⛅':'☀️';
       document.getElementById('wxIco').textContent=ico;
       document.getElementById('wxDesc').textContent =
-        (EV.weatherPlace? EV.weatherPlace+' \u00b7 ':'')+[temp,wind,pc].filter(Boolean).join(' \u00b7 ');
+        (EV.weatherPlace?EV.weatherPlace+' \u00b7 ':'')+[temp,wind,pc].filter(Boolean).join(' \u00b7 ');
       var strip=document.getElementById('wxStrip');
       if(storm){
         strip.classList.add('alert');
@@ -481,19 +516,11 @@ function loadWx(){
     }).catch(function(){});
 }
 
+paintBrand(); paintWatermark(); renderDays(); renderFilters();
 render(); stamp();
 load(S.date); loadWx();
 setInterval(function(){ load(S.date); }, REFRESH);
 setInterval(loadWx, 10*60*1000);
-
-
-/* boot */
-try{ jarBrand('Scores'); paintWatermark(); renderDays(); renderBands();
-  var bn=document.getElementById('brName'); if(bn) bn.textContent=EV.name||'';
-  var bs=document.getElementById('brSub');  if(bs) bs.textContent=(EV.subtitle||'').toUpperCase();
-  var bh=document.getElementById('brHost');
-  if(bh && EV.host) bh.innerHTML=(EV.subtitle||'')+' \u00b7 <a href="'+EV.host.url+'">'+EV.host.name+'</a>';
-}catch(e){}
 </script>
 </body>
 </html>
