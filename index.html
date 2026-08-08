@@ -540,6 +540,18 @@ textarea.fin{resize:vertical;line-height:1.5}
   font-family:var(--mono);font-size:11.5px;color:var(--ice-pale);line-height:1.6}
 .sx-a{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
 .sx-a .btn{flex:1;min-width:150px}
+
+/* Staff self check in */
+.selfcard{display:flex;align-items:center;gap:12px;margin:0 0 10px;
+  background:rgba(23,51,75,.5);border:1.5px solid rgba(127,184,222,.24);
+  border-radius:11px;padding:12px 14px}
+.selfcard.in{border-color:rgba(79,168,122,.45)}
+.selfcard b{display:block;font-family:var(--disp);font-weight:900;font-size:15px;
+  letter-spacing:.05em;text-transform:uppercase}
+.selfcard i{display:block;font-style:normal;font-size:12.5px;color:var(--steel);margin-top:1px}
+.selfcard .btn{margin-left:auto;flex:0 0 auto;min-width:120px}
+.selfok{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:#8FD8B4}
 </style>
 </head>
 <body>
@@ -677,6 +689,7 @@ textarea.fin{resize:vertical;line-height:1.5}
     <button aria-pressed="false" onclick="setView('roster',this)">Roster<span class="badge" id="rosBadge" style="display:none">0</span></button>
   </div>
   <div class="stats" id="staffStats"></div>
+  <div id="staffSelf" style="display:none"></div>
   <div class="vtabs" id="staffSites" style="display:none"></div>
   <div id="staffBody"></div>
 </div>
@@ -1474,7 +1487,7 @@ function renderStats(s){
   if(!s) return;
 
   if(S.site!=='all' && S.board){
-    var b=S.board.filter(function(g){ return String(g.venue||'')===S.site; });
+    var b=S.board.filter(function(g){ return !g.staffSlot && String(g.venue||'')===S.site; });
     var seen={}, tot=0, inn=0, rep=0, noCrew=0;
     b.forEach(function(g){
       if(g.scoreStatus==='Reported') rep++;
@@ -1763,6 +1776,58 @@ function showEodFor(role){
   b.style.display=(role==='sc'||role==='coordinator')?'block':'none';
 }
 
+/* ══ STAFF SELF CHECK IN ══════════════════════════════════
+   A coordinator arriving on site needs to record that they are here, the
+   same as a referee. Their Assignr slot is the payment record, so it is
+   what they check in against. */
+function mySlots(){
+  try{
+    var me=String((S.staff&&S.staff.name)||'').toLowerCase().trim();
+    if(!me||!S.board) return [];
+    return S.board.filter(function(g){
+      if(!g.staffSlot) return false;
+      return (g.crew||[]).some(function(c){
+        return String(c.name||'').toLowerCase().trim()===me;
+      });
+    });
+  }catch(e){ return []; }
+}
+
+function renderSelfCheckin(){
+  var host=document.getElementById('staffSelf'); if(!host) return;
+  var slots=mySlots();
+  if(!slots.length){ host.style.display='none'; host.innerHTML=''; return; }
+  var me=String((S.staff&&S.staff.name)||'').toLowerCase().trim();
+  host.style.display='';
+  host.innerHTML=slots.map(function(g){
+    var mine=(g.crew||[]).filter(function(c){
+      return String(c.name||'').toLowerCase().trim()===me; })[0]||{};
+    var inYet=!!mine.checkedIn;
+    return '<div class="selfcard'+(inYet?' in':'')+'">'+
+      '<div><b>'+esc(g.staffSlot)+'</b>'+
+        '<i>'+esc((window.JAR&&JAR.short)?JAR.short(g.venue):g.venue)+
+        (g.time?' \u00b7 '+esc(g.time):'')+'</i></div>'+
+      (inYet
+        ? '<span class="selfok">Checked in</span>'
+        : '<button class="btn go" onclick="selfCheckin(\''+g.gameId+'\',this)">Check in</button>')+
+    '</div>';
+  }).join('');
+}
+
+function selfCheckin(gameId,btn){
+  var g=(S.board||[]).filter(function(x){return x.gameId===gameId;})[0];
+  if(!g) return;
+  btn.disabled=true; btn.textContent='Checking in\u2026';
+  post({action:'checkinVenue',refName:(S.staff&&S.staff.name)||'',
+        venue:g.venue,date:S.date,by:'self'})
+    .then(function(r){
+      if(r&&r.status==='ok'){ loadBoard(); }
+      else { btn.disabled=false; btn.textContent='Check in';
+             alert((r&&r.message)||'Could not check in'); }
+    },function(){ btn.disabled=false; btn.textContent='Check in';
+             alert('Could not reach the server.'); });
+}
+
 function renderStaffSites(){
   var box=document.getElementById('staffSites'); if(!box) return;
   var vs=staffVenues();
@@ -1794,8 +1859,12 @@ function renderStaff(){
     el.innerHTML='<div class="empty"><b>No games</b>Nothing scheduled for this day.</div>'; return; }
   var caps=(S.staff&&S.staff.caps)||{};
 
-  var board=(S.site==='all') ? S.board
-    : S.board.filter(function(g){ return String(g.venue||'')===S.site; });
+  // Site Coordinator and Standby slots are Assignr payment records, not
+  // fixtures. They come back on the board so staff can check in against
+  // them, but they never belong in a list of games.
+  var board=S.board.filter(function(g){ return !g.staffSlot; });
+  if(S.site!=='all') board=board.filter(function(g){ return String(g.venue||'')===S.site; });
+  renderSelfCheckin();
 
   var live=board.filter(function(g){ return !isSpent(g); });
   var spent=board.filter(isSpent);
